@@ -118,19 +118,19 @@ function md(s: string | undefined): string
 
 export function demoUrl(config: Config, slug: string): string
 {
-    return `${config.static.url}/demo/${slug}/`;
+    return `${config.static.url}/${config.static.folders.demos}/${slug}/`;
 }
 
 /** Where a card links to: the demo, or the full painting */
 function itemUrl(config: Config, item: Item): string
 {
-    return item.ext ? `${config.static.url}/${mediaFolder(item)}/${item.slug}.${item.ext}` : demoUrl(config, item.slug);
+    return item.ext ? `${config.static.url}/${mediaFolder(config, item)}/${item.slug}.${item.ext}` : demoUrl(config, item.slug);
 }
 
 /** The thumbnail URL changes with every update, so caches don't keep the old picture */
 function thumbUrl(config: Config, item: Item): string
 {
-    return `${config.static.url}/thumbs/${item.slug}.jpg?v=${item.updated}`;
+    return `${config.static.url}/${config.static.folders.thumbs}/${item.slug}.jpg?v=${item.updated}`;
 }
 
 // "Burning Chrome: Vroom" -> "Vroom" under its head "Burning Chrome 2021"

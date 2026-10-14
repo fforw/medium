@@ -5,13 +5,26 @@ import path from "node:path";
 export interface Config
 {
     ghost: { url: string, adminKey: string };
-    static: { rsync: string, url: string };
+    static: { rsync: string, url: string, folders: Folders };
     dataFile: string;
     /** The template new demo repos are made from, so leftovers of it can be pointed out */
     starter: { repo?: string, placeholders: string[] };
     /** The categories medium add files new images and videos under */
     categories: { images?: string, videos?: string };
 }
+
+/** The folders below the static directory that medium writes to */
+export interface Folders
+{
+    /** Demo deployments, one folder each */
+    demos: string;
+    /** Card thumbnails of every kind of item */
+    thumbs: string;
+    images: string;
+    videos: string;
+}
+
+export const DEFAULT_FOLDERS: Folders = { demos: "demo", thumbs: "thumbs", images: "images", videos: "videos" };
 
 export const CONFIG_FILE = path.join(os.homedir(), ".config", "medium", "config.json");
 
@@ -20,13 +33,13 @@ export function expandHome(p: string): string
     return p === "~" || p.startsWith("~/") ? path.join(os.homedir(), p.slice(1)) : p;
 }
 
-/** Checks an optional object of the config against the types of its keys */
-function optional(config: Record<string, unknown>, key: string, types: Record<string, "string" | "string[]">)
+/** Checks an optional object of the config against the types of its keys; name is its path for messages */
+function optional(parent: Record<string, unknown>, key: string, types: Record<string, "string" | "string[]">, name = key)
 {
-    const value = config[key] ?? {};
-    if (typeof value !== "object" || Array.isArray(value))
+    const value = parent[key] ?? {};
+    if (typeof value !== "object" || value === null || Array.isArray(value))
     {
-        throw new Error(`${CONFIG_FILE}: "${key}" must be an object`);
+        throw new Error(`${CONFIG_FILE}: "${name}" must be an object`);
     }
     for (const [k, v] of Object.entries(value))
     {
@@ -36,8 +49,8 @@ function optional(config: Record<string, unknown>, key: string, types: Record<st
         if (!ok)
         {
             throw new Error(type
-                ? `${CONFIG_FILE}: "${key}.${k}" must be ${type === "string" ? "a string" : "an array of strings"}`
-                : `${CONFIG_FILE}: unknown key "${key}.${k}"`);
+                ? `${CONFIG_FILE}: "${name}.${k}" must be ${type === "string" ? "a string" : "an array of strings"}`
+                : `${CONFIG_FILE}: unknown key "${name}.${k}"`);
         }
     }
     return value;
@@ -78,6 +91,9 @@ export function parseConfig(raw: unknown): Config
     config.ghost.url = config.ghost.url.replace(/\/+$/, "");
     config.static.url = config.static.url.replace(/\/+$/, "");
     config.static.rsync = config.static.rsync.replace(/\/+$/, "");
+    const folders = optional(config.static, "folders", { demos: "string", thumbs: "string", images: "string", videos: "string" }, "static.folders") as Partial<Folders>;
+    config.static.folders = Object.fromEntries(Object.entries(DEFAULT_FOLDERS).map(([k, def]) =>
+        [k, (folders[k as keyof Folders] ?? def).replace(/^\/+|\/+$/g, "")]));
     config.dataFile = expandHome(config.dataFile);
     return config as Config;
 }

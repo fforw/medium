@@ -86,7 +86,7 @@ export async function deploy(config: Config, opts: DeployOptions)
     const category = item ? item.category : newItemCategory(data, info.manifest);
 
     await ensureDirs(config);
-    await syncDir(config, docs, `demo/${variant ?? slug}`);
+    await syncDir(config, docs, `${config.static.folders.demos}/${variant ?? slug}`);
 
     if (!variant)
     {
@@ -95,7 +95,7 @@ export async function deploy(config: Config, opts: DeployOptions)
         {
             const file = path.join(tmp, `${slug}.jpg`);
             await takeShot(demoUrl(config, slug), file, info.manifest.shot ?? {}, opts.pick);
-            await syncFile(config, file, `thumbs/${slug}.jpg`);
+            await syncFile(config, file, `${config.static.folders.thumbs}/${slug}.jpg`);
         }
         finally
         {

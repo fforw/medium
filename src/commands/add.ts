@@ -154,8 +154,8 @@ export async function add(config: Config, images: string[])
             {
                 data.items.push(item);
             }
-            await syncFile(config, image, `${mediaFolder(item)}/${slug}.${ext}`);
-            await syncFile(config, thumb, `thumbs/${slug}.jpg`);
+            await syncFile(config, image, `${mediaFolder(config, item)}/${slug}.${ext}`);
+            await syncFile(config, thumb, `${config.static.folders.thumbs}/${slug}.jpg`);
             categories.add(item.category);
             // Saved after each file, so an error later doesn't lose the answers
             saveData(config.dataFile, data);

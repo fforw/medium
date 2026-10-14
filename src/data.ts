@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import type { Config } from "./config.ts";
 
 export interface Page
 {
@@ -60,9 +61,9 @@ export function isVideo(item: Item): boolean
 }
 
 /** The static folder a painting or video file lives in */
-export function mediaFolder(item: Item): string
+export function mediaFolder(config: Config, item: Item): string
 {
-    return isVideo(item) ? "videos" : "paintings";
+    return isVideo(item) ? config.static.folders.videos : config.static.folders.images;
 }
 
 export function loadData(file: string): Data

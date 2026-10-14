@@ -36,7 +36,7 @@ export async function shot(config: Config, slug: string, pick: boolean)
     {
         const file = path.join(tmp, `${slug}.jpg`);
         await takeShot(demoUrl(config, slug), file, localShotSettings(slug, item.repo), pick);
-        await syncFile(config, file, `thumbs/${slug}.jpg`);
+        await syncFile(config, file, `${config.static.folders.thumbs}/${slug}.jpg`);
     }
     finally
     {
