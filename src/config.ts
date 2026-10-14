@@ -31,6 +31,11 @@ export function loadConfig(): Config
             throw new Error(`${CONFIG_FILE}: "${key}" is missing`);
         }
     }
+    // The client's own check is unanchored, so a key with extra text around it gets as far as the server
+    if (!/^[0-9a-f]{24}:[0-9a-f]{64}$/.test(config.ghost.adminKey))
+    {
+        throw new Error(`${CONFIG_FILE}: "ghost.adminKey" must be Ghost's Admin API key, <24 hex>:<64 hex>`);
+    }
     config.ghost.url = config.ghost.url.replace(/\/+$/, "");
     config.static.url = config.static.url.replace(/\/+$/, "");
     config.static.rsync = config.static.rsync.replace(/\/+$/, "");
