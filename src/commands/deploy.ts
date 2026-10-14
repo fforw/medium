@@ -41,7 +41,7 @@ function checkName(data: Data, slug: string, variant: string | undefined): Item 
     }
     if (owner?.item.ext)
     {
-        throw new Error(`"${slug}" is already a painting`);
+        throw new Error(`"${slug}" is already a painting or video`);
     }
     return owner?.item;
 }

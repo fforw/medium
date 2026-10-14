@@ -36,10 +36,12 @@ export interface Item
     created: string;
     updated: string;
     hidden?: boolean;
-    /** Paintings only: the image's file extension, without the dot */
+    /** Paintings and videos only: the file's extension, without the dot */
     ext?: string;
-    /** Paintings only: the thumbnail's crop centre, as fractions of the image size */
+    /** Paintings and videos only: the thumbnail's crop centre, as fractions of the image size */
     focus?: [number, number];
+    /** Videos only: the second the thumbnail is taken from */
+    frame?: number;
 }
 
 export interface Data
@@ -50,6 +52,21 @@ export interface Data
 }
 
 export const PAINTINGS = "paintings";
+export const VIDEOS = "videos";
+
+export const IMAGE_FORMATS = ["jpg", "jpeg", "png", "webp", "gif", "avif"];
+export const VIDEO_FORMATS = ["mp4", "webm"];
+
+export function isVideo(item: Item): boolean
+{
+    return !!item.ext && VIDEO_FORMATS.includes(item.ext);
+}
+
+/** The static folder a painting or video file lives in */
+export function mediaFolder(item: Item): string
+{
+    return isVideo(item) ? "videos" : "paintings";
+}
 
 export function loadData(file: string): Data
 {

@@ -27,7 +27,7 @@ export async function shot(config: Config, slug: string, pick: boolean)
     }
     if (owner.variant || owner.item.ext)
     {
-        throw new Error(`"${slug}" is ${owner.variant ? "a variant" : "a painting"} and has no screenshot`);
+        throw new Error(`"${slug}" is ${owner.variant ? "a variant" : "a painting or video"} and has no screenshot`);
     }
     const { item } = owner;
 

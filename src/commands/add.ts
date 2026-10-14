@@ -2,13 +2,14 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import type { Config } from "../config.ts";
-import { deploymentOwner, findCategory, loadData, PAINTINGS, saveData, today, type Item } from "../data.ts";
+import { deploymentOwner, findCategory, IMAGE_FORMATS, isVideo, loadData, mediaFolder, PAINTINGS, saveData, today, VIDEO_FORMATS, VIDEOS, type Item } from "../data.ts";
+import { grabFrame } from "../frame.ts";
 import { pagesFor, pushPages } from "../ghost.ts";
 import { closePrompts, ask } from "../prompt.ts";
 import { backupData, ensureDirs, syncFile } from "../remote.ts";
 import { makeThumb } from "../thumb.ts";
 
-const FORMATS = ["jpg", "jpeg", "png", "webp", "gif", "avif"];
+const FORMATS = [...IMAGE_FORMATS, ...VIDEO_FORMATS];
 
 /** some-painting -> Some Painting, toilet-vespa.3 -> Toilet Vespa 3 */
 export function titleCase(slug: string): string
@@ -45,20 +46,28 @@ function parseFocus(s: string): [number, number] | null | undefined
     return parts.length === 2 && parts.every(n => n >= 0 && n <= 1) ? [parts[0], parts[1]] : undefined;
 }
 
-/** Asks for the painting's details, defaulting to the stored ones */
-async function askDetails(slug: string, existing: Item | undefined)
+function parseFrame(s: string): number | undefined
+{
+    const n = Number(s);
+    return s && n >= 0 ? n : undefined;
+}
+
+/** Asks for the painting's or video's details, defaulting to the stored ones */
+async function askDetails(slug: string, existing: Item | undefined, video: boolean)
 {
     console.log(`\n${slug}${existing ? " (already published, the stored values are filled in)" : ""}`);
     const title = await ask("Title", existing?.title ?? titleCase(slug));
     const created = await askUntil("Date", existing?.created ?? today(), parseDate, "as YYYY-MM-DD");
     const topics = await ask("Topics, comma-separated", existing?.topics.join(", "));
     const description = await ask("Description (one line of Markdown)", existing?.description);
+    const frame = video ? await askUntil("Frame (second of the video for the thumbnail)", String(existing?.frame ?? 1), parseFrame, "a number of seconds, like 1 or 2.5") : undefined;
     const focus = await askUntil("Focus x, y (0..1, empty for automatic)", existing?.focus?.join(", ") ?? "", parseFocus, "two numbers between 0 and 1, like 0.3, 0.6");
     return {
         title,
         created,
         topics: topics.split(",").map(t => t.trim()).filter(Boolean),
         description,
+        frame,
         focus,
     };
 }
@@ -67,7 +76,7 @@ export async function add(config: Config, images: string[])
 {
     if (!images.length)
     {
-        throw new Error("name the images to add");
+        throw new Error("name the images or videos to add");
     }
     for (const image of images)
     {
@@ -83,7 +92,14 @@ export async function add(config: Config, images: string[])
     }
 
     const data = loadData(config.dataFile);
-    findCategory(data, PAINTINGS);
+    if (images.some(f => IMAGE_FORMATS.includes(path.extname(f).slice(1).toLowerCase())))
+    {
+        findCategory(data, PAINTINGS);
+    }
+    if (images.some(f => VIDEO_FORMATS.includes(path.extname(f).slice(1).toLowerCase())))
+    {
+        findCategory(data, VIDEOS);
+    }
     await ensureDirs(config);
 
     const categories = new Set<string>();
@@ -94,25 +110,34 @@ export async function add(config: Config, images: string[])
         {
             const ext = path.extname(image).slice(1).toLowerCase();
             const slug = path.basename(image, path.extname(image));
+            const video = VIDEO_FORMATS.includes(ext);
             const owner = deploymentOwner(data, slug);
             if (owner && (owner.variant || !owner.item.ext))
             {
                 throw new Error(`"${slug}" is already a demo or variant`);
             }
+            if (owner && isVideo(owner.item) !== video)
+            {
+                throw new Error(`"${slug}" is already a ${video ? "painting" : "video"}`);
+            }
             const existing = owner?.item;
-            const details = await askDetails(slug, existing);
+            const details = await askDetails(slug, existing, video);
 
+            let source = image;
+            if (video)
+            {
+                source = path.join(tmp, `${slug}.png`);
+                await grabFrame(image, details.frame!, source);
+            }
             const thumb = path.join(tmp, `${slug}.jpg`);
-            await makeThumb(image, thumb, details.focus ?? undefined);
-            await syncFile(config, image, `paintings/${slug}.${ext}`);
-            await syncFile(config, thumb, `thumbs/${slug}.jpg`);
+            await makeThumb(source, thumb, details.focus ?? undefined);
 
             // Fields edited by hand, like hidden or a moved category, are kept
             const item: Item = {
                 variants: [],
                 ...existing,
                 slug,
-                category: existing?.category ?? PAINTINGS,
+                category: existing?.category ?? (video ? VIDEOS : PAINTINGS),
                 topics: details.topics,
                 title: details.title,
                 description: details.description,
@@ -120,6 +145,10 @@ export async function add(config: Config, images: string[])
                 updated: today(),
                 ext,
             };
+            if (video)
+            {
+                item.frame = details.frame;
+            }
             if (details.focus)
             {
                 item.focus = details.focus;
@@ -136,8 +165,10 @@ export async function add(config: Config, images: string[])
             {
                 data.items.push(item);
             }
+            await syncFile(config, image, `${mediaFolder(item)}/${slug}.${ext}`);
+            await syncFile(config, thumb, `thumbs/${slug}.jpg`);
             categories.add(item.category);
-            // Saved after each painting, so an error later doesn't lose the answers
+            // Saved after each file, so an error later doesn't lose the answers
             saveData(config.dataFile, data);
         }
     }

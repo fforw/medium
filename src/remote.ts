@@ -29,7 +29,7 @@ function target(config: Config): { host: string, root: string }
 export async function ensureDirs(config: Config)
 {
     const { host, root } = target(config);
-    await run("ssh", [host, "mkdir", "-p", ...["demo", "thumbs", "paintings"].map(d => `${root}/${d}`), "medium"]);
+    await run("ssh", [host, "mkdir", "-p", ...["demo", "thumbs", "paintings", "videos"].map(d => `${root}/${d}`), "medium"]);
 }
 
 /** Syncs a local folder to a folder under the static root, removing what is gone locally */
