@@ -74,7 +74,9 @@ export function loadData(file: string): Data
     {
         throw new Error(`no data file at ${file}`);
     }
-    const data = JSON.parse(fs.readFileSync(file, "utf8"));
+    // An empty file, as left by touch, is a data file with nothing in it yet
+    const text = fs.readFileSync(file, "utf8");
+    const data = text.trim() ? JSON.parse(text) : {};
     data.pages ??= [];
     data.categories ??= [];
     data.items ??= [];
