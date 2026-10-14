@@ -38,9 +38,22 @@ committed:
         "rsync": "myweb:static",
         "url": "https://fforw.de/static"
     },
-    "dataFile": "~/Documents/fforw/medium-data.json"
+    "dataFile": "~/Documents/fforw/medium-data.json",
+    "starter": {
+        "repo": "https://github.com/fforw/simple-starter",
+        "placeholders": [
+            "Simple Starter",
+            "Simple TypeScript build starter for simple, client-only demos",
+            "Simple JS build starter for simple, client-only demos"
+        ]
+    }
 }
 ```
+
+`starter` names the template demo repos are made from, and the text
+in its READMEs that a demo should have replaced; deploy warns about
+both (see Demos). It is optional: without it there is nothing to
+warn about.
 
 ## Data file
 
@@ -145,14 +158,14 @@ screenshots are kept outside the demo folders for the same reason.
   is none.
 * **The description:** the README body, minus the title heading.
 
-  Deploy warns, but still deploys, when the title or body is still
-  simple-starter's placeholder text. medium keeps a short list of those
-  strings, including the template's older READMEs ("Simple JS build
-  starter for simple, client-only demos." ended up on 19 of the old
-  cards).
+  Deploy warns, but still deploys, when the title or body still
+  contains the starter template's placeholder text, from the list in
+  the config's `starter.placeholders`. That list includes the
+  template's older READMEs ("Simple JS build starter for simple,
+  client-only demos." ended up on 19 of the old cards).
 * **The GitHub link:** `git remote get-url origin`. Deploy warns when
-  that is still `fforw/simple-starter`, since a demo created from the
-  template and never re-pointed would link to the template.
+  that is still the config's `starter.repo`, since a demo created
+  from the template and never re-pointed would link to the template.
 * **An `ff-medium` field in `package.json`** for everything else:
 
   ```json

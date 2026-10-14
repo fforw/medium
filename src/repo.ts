@@ -1,15 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
-
-/** Text from simple-starter's READMEs, old and new, that a demo should have replaced */
-const PLACEHOLDERS = [
-    "Simple Starter",
-    "Simple TypeScript build starter for simple, client-only demos",
-    "Simple JS build starter for simple, client-only demos",
-];
-
-const STARTER_REPO = /github\.com[:/]fforw\/simple-starter(\.git)?$/;
+import type { Config } from "./config.ts";
 
 export interface Shot
 {
@@ -66,7 +58,7 @@ export function readManifest(dir: string): Manifest
                 {
                     fail(`"ff-medium.category" must be a string`);
                 }
-                // An empty string is simple-starter's way of saying "fill me in"
+                // An empty string is how a starter template says "fill me in"
                 if (value)
                 {
                     manifest.category = value;
@@ -152,31 +144,32 @@ export function readOrigin(dir: string): string | null
     }
 }
 
-/** git@github.com:fforw/x.git -> https://github.com/fforw/x */
+/** git@github.com:user/x.git -> https://github.com/user/x */
 export function toWebUrl(url: string): string
 {
     return url
         .replace(/^git@([^:]+):/, "https://$1/")
         .replace(/^ssh:\/\/git@([^/]+)\//, "https://$1/")
-        .replace(/\.git$/, "");
+        .replace(/(\.git)?\/*$/, "");
 }
 
-export function readRepo(dir: string): RepoInfo
+/** Reads a demo repo, warning about anything still left over from the starter template */
+export function readRepo(dir: string, starter: Config["starter"]): RepoInfo
 {
     const { title, description } = readReadme(dir);
     const repo = readOrigin(dir);
     const warnings: string[] = [];
 
-    for (const p of PLACEHOLDERS)
+    for (const p of starter.placeholders)
     {
         if (title?.includes(p) || description.includes(p))
         {
-            warnings.push(`README still contains simple-starter's "${p}"`);
+            warnings.push(`README still contains the starter's "${p}"`);
         }
     }
-    if (repo && STARTER_REPO.test(repo))
+    if (repo && starter.repo && repo === toWebUrl(starter.repo))
     {
-        warnings.push("origin still points to fforw/simple-starter");
+        warnings.push(`origin still points to the starter, ${starter.repo}`);
     }
     return { title, description, repo, manifest: readManifest(dir), warnings };
 }

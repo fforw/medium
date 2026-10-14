@@ -30,7 +30,11 @@ contains the Admin API key, so make it readable only by you
         "rsync": "myhost:static",
         "url": "https://blog.example.com/static"
     },
-    "dataFile": "~/Documents/medium-data.json"
+    "dataFile": "~/Documents/medium-data.json",
+    "starter": {
+        "repo": "https://github.com/me/demo-template",
+        "placeholders": ["Demo Template", "A template for demos"]
+    }
 }
 ```
 
@@ -45,6 +49,11 @@ contains the Admin API key, so make it readable only by you
 * `dataFile`: where the data file lives (`~` is allowed). Every push
   also copies it to `~/medium/data.json` on the same host, as an
   offsite backup.
+* `starter` (optional): the template repo new demos are made from.
+  `medium deploy` warns when a demo's `origin` still points to
+  `starter.repo`, or its README still contains one of the
+  `placeholders`, the template's own text. Without it, there are no
+  such warnings.
 
 ## Data file
 

@@ -80,7 +80,7 @@ export async function deploy(config: Config, opts: DeployOptions)
     }
 
     const data = loadData(config.dataFile);
-    const info = readRepo(dir);
+    const info = readRepo(dir, config.starter);
     info.warnings.forEach(w => console.warn(`warning: ${w}`));
     let item = checkName(data, slug, variant);
     const category = item ? item.category : newItemCategory(data, info.manifest);
