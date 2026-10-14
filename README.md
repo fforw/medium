@@ -16,9 +16,16 @@ installed, `ffmpeg` too for videos.
 
 ## Configuration
 
-`~/.config/medium/config.json` holds the per-machine settings. It
-contains the Admin API key, so make it readable only by you
-(`chmod 600`).
+`~/.config/medium/config.json` holds the per-machine settings.
+`medium init` asks for each of them, writes the file readable only by
+you (it contains the Admin API key), creates the data file if needed,
+and checks that Ghost accepts the key and that ssh to the host works.
+Run it again to change a setting: the current values are filled in,
+and the key is kept unless you type a new one.
+
+    medium init
+
+The file can also be written by hand:
 
 ```json
 {
@@ -66,8 +73,8 @@ contains the Admin API key, so make it readable only by you
 
 The data file is the source of truth for what is published; Ghost only
 shows it. It is JSON, written by medium and meant to be edited by hand
-as well. Start with an empty file (`touch` it) and add your pages and
-categories:
+as well. `medium init` creates an empty one (so does `touch`); add
+your pages and categories:
 
 ```json
 {
@@ -114,6 +121,7 @@ you changed, or `medium push --all`.
 
 ## Usage
 
+    medium init                                        create or change the config
     medium deploy [variant] [--slug <slug>] [--pick]   deploy the demo in this repo
     medium add <file>...                               publish paintings and videos
     medium shot <slug> [--pick]                        retake a demo's screenshot

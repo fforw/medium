@@ -26,7 +26,7 @@ which medium creates and updates through the Ghost Admin API.
 ## Configuration
 
 `~/.config/medium/config.json` is per machine, `chmod 600` and not
-committed:
+committed. `medium init` writes it from prompts:
 
 ```json
 {
@@ -322,6 +322,7 @@ later, but isn't needed.
 
 | Command | Does |
 |---|---|
+| `medium init` | Asks for the config settings and writes the config file, creates the data file if needed, and checks the Ghost key and ssh |
 | `medium deploy [variant] [--slug <slug>] [--pick]` | Deploys the demo in the current repo, as described above |
 | `medium add <file>...` | Publishes paintings and videos |
 | `medium shot <slug> [--pick]` | Retakes the screenshot of a deployed demo, with the `shot` settings of the repo it is run in, if that is the demo's |
