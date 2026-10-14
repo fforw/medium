@@ -271,3 +271,7 @@ the data file by hand, followed by a `medium push`.
   the screenshots in the recovery archive, instead of redeploying about
   100 repos. Its `group` field already names each old variant's parent,
   so those 88 deployments become `variants` entries where they are.
+  Migrated descriptions stay until a demo is redeployed, which re-reads
+  its README as usual. Many READMEs are missing, still the
+  simple-starter template text, or full of setup notes; they are fixed
+  one by one when their demo is touched again, not up front.
