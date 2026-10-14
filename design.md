@@ -284,7 +284,7 @@ separate player page. The list page carries a small inline script, next
 to its CSS, that opens the video over the page:
 
 * The card stays a plain link to the video file, marked with
-  `data-video`. Without JavaScript, or opened in a new tab, the
+  `data-video` and a play badge over its thumbnail. Without JavaScript, or opened in a new tab, the
   browser's own player shows it.
 * A click on such a card opens a `<dialog>` with
   `<video controls autoplay loop playsinline>`. Esc, a close button or
