@@ -64,9 +64,11 @@ The file can also be written by hand:
   for files added with `medium add` (`images`, `videos`). Renaming one
   later doesn't move what is already uploaded.
 * `static.url`: the public URL of that same directory.
-* `dataFile`: where the data file lives (`~` is allowed). Every push
-  also copies it to `~/medium/data.json` on the same host, as an
-  offsite backup.
+* `dataFile`: where the data file lives (`~` is allowed).
+* `dataBackup` (optional): where every push also copies the data file
+  on the ssh host, as an offsite backup; relative to your home there
+  unless it starts with `/`. Default `medium/data.json`, `""` for no
+  copy. The folder is created as needed.
 * `starter` (optional): the template repo new demos are made from.
   `medium deploy` warns when a demo's `origin` still points to
   `starter.repo`, or its README still contains one of the

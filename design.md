@@ -68,8 +68,9 @@ asks for it.
 
 Plain JSON, written by medium and editable by hand. It lives wherever is
 convenient (backed up by Time Machine), and every push also copies it to
-the server (`~/medium/data.json`, outside the public static tree) so the
-nightly server backup holds an offsite copy.
+the server (the config's `dataBackup`, by default `~/medium/data.json`,
+outside the public static tree) so the nightly server backup holds an
+offsite copy.
 
 ```json
 {
@@ -152,8 +153,9 @@ nightly server backup holds an offsite copy.
 
 The folder names below the static directory come from the config's
 `static.folders`; the defaults are `demo`, `thumbs`, `images` and
-`videos`. This layout is fforw.de's, which sets `images` to
-`paintings`.
+`videos`, and the data file copy goes to the config's `dataBackup`.
+This layout is fforw.de's, which sets `images` to `paintings` and
+keeps the default `dataBackup`.
 
 Everything under `demo/` is flat. A variant is a sibling of its parent,
 never a sub-folder, because the deploy runs `rsync --delete` on
