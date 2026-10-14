@@ -113,13 +113,19 @@ async function main()
     }
 
     const config = loadConfig();
-    // An empty file, as left by touch, has nothing to lose
-    if (fs.existsSync(config.dataFile) && fs.statSync(config.dataFile).size > 0)
+    // An empty file, as left by touch, has nothing to lose, and an
+    // identical one means an earlier run stopped at the upload
+    const json = JSON.stringify(data, null, 4) + "\n";
+    const existing = fs.existsSync(config.dataFile) ? fs.readFileSync(config.dataFile, "utf8") : "";
+    if (existing && existing !== json)
     {
         throw new Error(`${config.dataFile} already exists, not overwriting it`);
     }
-    saveData(config.dataFile, data);
-    console.error(`wrote ${config.dataFile}`);
+    if (!existing)
+    {
+        saveData(config.dataFile, data);
+        console.error(`wrote ${config.dataFile}`);
+    }
 
     // No --delete: thumbs/ is shared with the paintings
     const shots = path.join(dir, "build", "demo-shots");
