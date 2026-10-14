@@ -10,13 +10,10 @@ import { makeThumb } from "../thumb.ts";
 
 const FORMATS = ["jpg", "jpeg", "png", "webp", "gif", "avif"];
 
-/** Answering "-" clears a field that has a stored value */
-const CLEAR = "-";
-
-/** some-painting -> Some Painting */
+/** some-painting -> Some Painting, toilet-vespa.3 -> Toilet Vespa 3 */
 export function titleCase(slug: string): string
 {
-    return slug.split(/[-_\s]+/).filter(Boolean).map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
+    return slug.split(/[-_.\s]+/).filter(Boolean).map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
 }
 
 async function askUntil<T>(question: string, def: string, parse: (s: string) => T | undefined, hint: string): Promise<T>
@@ -37,10 +34,10 @@ function parseDate(s: string): string | undefined
     return /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(Date.parse(s)) ? s : undefined;
 }
 
-/** "x, y" as fractions of the image size; empty or "-" means no focus */
+/** "x, y" as fractions of the image size; empty means no focus */
 function parseFocus(s: string): [number, number] | null | undefined
 {
-    if (!s || s === CLEAR)
+    if (!s)
     {
         return null;
     }
@@ -51,7 +48,7 @@ function parseFocus(s: string): [number, number] | null | undefined
 /** Asks for the painting's details, defaulting to the stored ones */
 async function askDetails(slug: string, existing: Item | undefined)
 {
-    console.log(`\n${slug}${existing ? " (already published, Enter keeps the stored values)" : ""}`);
+    console.log(`\n${slug}${existing ? " (already published, the stored values are filled in)" : ""}`);
     const title = await ask("Title", existing?.title ?? titleCase(slug));
     const created = await askUntil("Date", existing?.created ?? today(), parseDate, "as YYYY-MM-DD");
     const topics = await ask("Topics, comma-separated", existing?.topics.join(", "));
@@ -60,8 +57,8 @@ async function askDetails(slug: string, existing: Item | undefined)
     return {
         title,
         created,
-        topics: topics === CLEAR ? [] : topics.split(",").map(t => t.trim()).filter(Boolean),
-        description: description === CLEAR ? "" : description,
+        topics: topics.split(",").map(t => t.trim()).filter(Boolean),
+        description,
         focus,
     };
 }

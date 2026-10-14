@@ -215,11 +215,13 @@ A painting is just an image file, in any format the browser shows
 extension.
 
 `medium add <image>` asks for the painting's details on the terminal,
-one prompt per field, each with a default you accept with Enter:
+one prompt per field. Each default is already typed in, to accept
+with Enter or edit first, so `toilet-vespa.3.png` only needs the "3"
+removed from its title:
 
 | Prompt | Default |
 |---|---|
-| Title | the slug with dashes as spaces, in title case (`some-painting` becomes "Some Painting") |
+| Title | the slug with dashes and dots as spaces, in title case (`some-painting` becomes "Some Painting") |
 | Date | today |
 | Topics | none |
 | Description | none; one line of Markdown |
@@ -227,8 +229,7 @@ one prompt per field, each with a default you accept with Enter:
 
 When the painting is already in the data file, the stored values are
 the defaults instead, so re-adding an image to replace it is a matter
-of pressing Enter; answering `-` clears a stored value. The answers
-go into the item in the `paintings`
+of pressing Enter. The answers go into the item in the `paintings`
 category, which also records the image's extension and the focus.
 
 It then does the following:
