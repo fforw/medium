@@ -119,7 +119,9 @@ same reason.
 
 ### Inputs from the demo repo
 
-* **The slug:** the repo folder name.
+* **The slug:** the repo folder name, unless `--slug` is given. Some
+  existing demos are deployed under other names, and some repos back
+  several items.
 * **The title:** the README's first `# heading`, or the slug if there
   is none.
 * **The description:** the README body, minus the title heading.
@@ -194,7 +196,7 @@ some-painting.md     # frontmatter (title, date, topics) + description
 
 | Command | Does |
 |---|---|
-| `medium deploy [variant] [--pick]` | Deploys the demo in the current repo, as described above |
+| `medium deploy [variant] [--slug <slug>] [--pick]` | Deploys the demo in the current repo, as described above |
 | `medium add <image>...` | Publishes paintings |
 | `medium shot <slug> [--pick]` | Retakes the screenshot of a deployed demo |
 | `medium push [page-or-category...]` / `--all` | Regenerates list pages from the data file; a category pushes the whole page it lives on |
