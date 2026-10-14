@@ -7,6 +7,8 @@ export interface Config
     ghost: { url: string, adminKey: string };
     static: { rsync: string, url: string, folders: Folders };
     dataFile: string;
+    /** Where the copy of the data file goes on the ssh host, relative to the home there; empty for none */
+    dataBackup: string;
     /** The template new demo repos are made from, so leftovers of it can be pointed out */
     starter: { repo?: string, placeholders: string[] };
     /** The categories medium add files new images and videos under */
@@ -25,6 +27,8 @@ export interface Folders
 }
 
 export const DEFAULT_FOLDERS: Folders = { demos: "demo", thumbs: "thumbs", images: "images", videos: "videos" };
+
+export const DEFAULT_DATA_BACKUP = "medium/data.json";
 
 export const CONFIG_FILE = path.join(os.homedir(), ".config", "medium", "config.json");
 
@@ -95,7 +99,20 @@ export function parseConfig(raw: unknown): Config
     config.static.folders = Object.fromEntries(Object.entries(DEFAULT_FOLDERS).map(([k, def]) =>
         [k, (folders[k as keyof Folders] ?? def).replace(/^\/+|\/+$/g, "")]));
     config.dataFile = expandHome(config.dataFile);
+    config.dataBackup ??= DEFAULT_DATA_BACKUP;
+    if (typeof config.dataBackup !== "string" || !isBackupPath(config.dataBackup))
+    {
+        throw new Error(`${CONFIG_FILE}: "dataBackup" must be ${BACKUP_PATH_HINT}`);
+    }
     return config as Config;
+}
+
+export const BACKUP_PATH_HINT = `a file path on the ssh host of letters, digits and . _ - ~ /, or "" for none`;
+
+/** It ends up in a remote shell command, unquoted (see backupData), so only plain path characters pass */
+export function isBackupPath(p: string): boolean
+{
+    return /^\/?([\w.~-]+\/)*[\w.-]+$|^$/.test(p);
 }
 
 /** The admin-api client's own check is unanchored, so a key with extra text around it gets as far as the server */
