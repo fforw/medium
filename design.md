@@ -102,7 +102,11 @@ nightly server backup holds an offsite copy.
   another page, is a one-field edit.
 * `topics` are free tags. Nothing renders them yet; they are kept for
   filtering later.
-* `hidden` keeps an item deployed but off the list pages.
+* `hidden` keeps an item deployed but off the list pages. A variant
+  can be `hidden` too, which leaves it off its parent's card; it is
+  still known, so its name can't be deployed again by mistake.
+* Paintings also store `ext`, the image's file extension, and `focus`
+  when one was given (see Paintings).
 * `variants` are other deployments that belong to the item. Each one
   is a flat `demo/<variant slug>/` of its own, but has no card: it
   only shows up as a link on its parent's card. The link goes to
@@ -223,7 +227,8 @@ one prompt per field, each with a default you accept with Enter:
 
 When the painting is already in the data file, the stored values are
 the defaults instead, so re-adding an image to replace it is a matter
-of pressing Enter. The answers go into the item in the `paintings`
+of pressing Enter; answering `-` clears a stored value. The answers
+go into the item in the `paintings`
 category, which also records the image's extension and the focus.
 
 It then does the following:
@@ -258,7 +263,7 @@ a teaser, and the full image is one click away.
 |---|---|
 | `medium deploy [variant] [--slug <slug>] [--pick]` | Deploys the demo in the current repo, as described above |
 | `medium add <image>...` | Publishes paintings |
-| `medium shot <slug> [--pick]` | Retakes the screenshot of a deployed demo |
+| `medium shot <slug> [--pick]` | Retakes the screenshot of a deployed demo, with the `shot` settings of the repo it is run in, if that is the demo's |
 | `medium push [page-or-category...]` / `--all` | Regenerates list pages from the data file; a category pushes the whole page it lives on |
 | `medium list [category]` | Shows items and their state |
 
@@ -279,9 +284,13 @@ the data file by hand, followed by a `medium push`.
   link.
 * The markup and CSS from the old `tools/demos/gallery.mjs`
   (fforw-recovery `a99666a`) are a starting point.
+* Thumbnail URLs carry `?v=<updated>`, so a new screenshot or painting
+  isn't hidden by a cached old one. `medium shot` sets `updated` for
+  that reason.
 * When a page is updated, medium sends the page's current `updated_at`
   back, as Ghost requires. It only ever touches the pages listed in
-  `pages`.
+  `pages`. A page that doesn't exist in Ghost yet is created as a
+  draft, to be published there once.
 
 ## Implementation
 
@@ -289,7 +298,11 @@ the data file by hand, followed by a `medium push`.
 * Dependencies: `@tryghost/admin-api`, `playwright`, `marked`, and
   `sharp` for the painting thumbnails. The `medium add` prompts use
   Node's own `readline`.
-* Uses the system `rsync` and `ssh`.
+* Uses the system `rsync` and `ssh`. On macOS that rsync is openrsync,
+  which has no `--mkpath`, so medium creates the folders it writes to
+  with `ssh mkdir -p` first.
+* Runs the TypeScript sources directly with Node's type stripping, so
+  there is no build step; `pnpm typecheck` runs `tsc`.
 * Installed with `pnpm link --global` from a local checkout, so every
   change is live without publishing to npm. `synch.sh` just expects
   `medium` on the `PATH`.
@@ -306,12 +319,18 @@ repos:
   to one onto the new ones.
 * **Variants:** the old `group` field names each variant's parent, so
   those 88 deployments become `variants` entries where they are, with
-  their title and description as link text and tooltip.
+  their title and description as link text and tooltip. The 8 hidden
+  ones stay hidden.
 * **Dates:** `created` is the real `date` from `inventory.json`, or
   `<year>-01-01` from `demos.json` where there is none.
 * **Screenshots:** the 221 old shots in `build/demo-shots/` are copied
   to `thumbs/<slug>.jpg`. The old pages took them from Ghost uploads,
   which the new pages don't use.
+
+The data file starts with three pages: `demos` with the old four
+sections, and `tools` and `paintings` with one category each. The
+script is `scripts/migrate.ts`; `--dry-run` prints the data file
+without writing or uploading anything.
 
 Migrated descriptions stay until a demo is redeployed, which re-reads
 its README as usual. Many READMEs are missing, still the simple-starter
