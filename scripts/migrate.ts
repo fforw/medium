@@ -113,7 +113,8 @@ async function main()
     }
 
     const config = loadConfig();
-    if (fs.existsSync(config.dataFile))
+    // An empty file, as left by touch, has nothing to lose
+    if (fs.existsSync(config.dataFile) && fs.statSync(config.dataFile).size > 0)
     {
         throw new Error(`${config.dataFile} already exists, not overwriting it`);
     }
