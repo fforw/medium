@@ -47,7 +47,7 @@ export async function pushPages(config: Config, data: Data, pages: Page[])
         else
         {
             await api.pages.add({ slug: page.slug, status: "draft", ...fields });
-            console.log(`created /${page.slug}/ as a draft, publish it in Ghost once`);
+            console.log(`created /${page.slug}/ as a draft; publish it in Ghost when it is ready, later pushes keep its status`);
         }
     }
 }
