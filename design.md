@@ -106,7 +106,8 @@ nightly server backup holds an offsite copy.
   can be `hidden` too, which leaves it off its parent's card; it is
   still known, so its name can't be deployed again by mistake.
 * Paintings also store `ext`, the image's file extension, and `focus`
-  when one was given (see Paintings).
+  when one was given (see Paintings). Videos store `ext`, `frame` and
+  `focus` the same way (see Videos).
 * `variants` are other deployments that belong to the item. Each one
   is a flat `demo/<variant slug>/` of its own, but has no card: it
   only shows up as a link on its parent's card. The link goes to
@@ -122,8 +123,9 @@ nightly server backup holds an offsite copy.
 
 ```
 ~/static/demo/<slug>/              build output of a demo, tool or variant
-~/static/thumbs/<slug>.jpg         card screenshot or painting thumbnail
+~/static/thumbs/<slug>.jpg         card screenshot, painting or video thumbnail
 ~/static/paintings/<slug>.<ext>    full-size painting, as given
+~/static/videos/<slug>.<ext>       video, as given
 ~/medium/data.json                 offsite copy of the data file
 ```
 
@@ -258,12 +260,52 @@ a teaser, and the full image is one click away.
   centred on that point as far as the image edges allow. This is the
   painting counterpart of `--pick` for demos.
 
+## Videos
+
+A video is a file the browser plays itself, `mp4` or `webm`, uploaded
+unchanged to `videos/<slug>.<ext>`. Like a painting, its slug is the
+file name without the extension. `medium add` takes videos as well as
+images and tells them apart by extension, so the prompts are the
+paintings' with one more:
+
+| Prompt | Default |
+|---|---|
+| Frame | `1`: the second of the video the thumbnail is taken from |
+
+The thumbnail is that frame, grabbed with `ffmpeg` and then cropped
+like a painting, so `focus` works the same way. Videos go into the
+`videos` category, which, like any category, can share a page with
+others.
+
+### The viewer
+
+A video card doesn't send the reader away to a bare video file or a
+separate player page. The list page carries a small inline script, next
+to its CSS, that opens the video over the page:
+
+* The card stays a plain link to the video file, marked with
+  `data-video`. Without JavaScript, or opened in a new tab, the
+  browser's own player shows it.
+* A click on such a card opens a `<dialog>` with
+  `<video controls autoplay loop playsinline>`. Esc, a close button or
+  a click on the backdrop closes it, and closing stops the video.
+  `playsinline` keeps mobile Safari from going fullscreen.
+* Opening the viewer sets the URL to the card's `#item-<slug>`, so a
+  shared link opens that video directly, and Back closes it.
+
+Ghost's editor doesn't run the script, so in the admin the cards only
+link to the files; the viewer works on the live page.
+
+Paintings keep linking to the plain image, which the browser already
+shows well. Showing them in the viewer too would be a small change
+later, but isn't needed.
+
 ## Commands
 
 | Command | Does |
 |---|---|
 | `medium deploy [variant] [--slug <slug>] [--pick]` | Deploys the demo in the current repo, as described above |
-| `medium add <image>...` | Publishes paintings |
+| `medium add <file>...` | Publishes paintings and videos |
 | `medium shot <slug> [--pick]` | Retakes the screenshot of a deployed demo, with the `shot` settings of the repo it is run in, if that is the demo's |
 | `medium push [page-or-category...]` / `--all` | Regenerates list pages from the data file; a category pushes the whole page it lives on |
 | `medium list [category]` | Shows items and their state |
@@ -282,7 +324,8 @@ the data file by hand, followed by a `medium push`.
   intro; a page with a single category shows no section heading or nav.
 * Each card shows the screenshot, the title linking to the demo, the
   rendered description, the variants as links, and the GitHub
-  link.
+  link. Painting and video cards link to their file instead, and have
+  neither variants nor a GitHub link.
 * The markup and CSS from the old `tools/demos/gallery.mjs`
   (fforw-recovery `a99666a`) are a starting point.
 * Thumbnail URLs carry `?v=<updated>`, so a new screenshot or painting
@@ -297,9 +340,10 @@ the data file by hand, followed by a `medium push`.
 
 * Node, ESM, TypeScript, built with pnpm.
 * Dependencies: `@tryghost/admin-api`, `playwright`, `marked`, and
-  `sharp` for the painting thumbnails. The `medium add` prompts use
+  `sharp` for the painting and video thumbnails. The `medium add` prompts use
   Node's own `readline`.
-* Uses the system `rsync` and `ssh`. On macOS that rsync is openrsync,
+* Uses the system `rsync` and `ssh`, and `ffmpeg` for the video
+  frames, which macOS doesn't ship (MacPorts has it). On macOS that rsync is openrsync,
   which has no `--mkpath`, so medium creates the folders it writes to
   with `ssh mkdir -p` first.
 * Runs the TypeScript sources directly with Node's type stripping, so
