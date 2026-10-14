@@ -1,7 +1,7 @@
 {
     "name": "@fforw/medium",
     "version": "0.0.1",
-    "description": "Publishes demos, tools and paintings to fforw.de",
+    "description": "Publishes pages based on static file contents on a Ghost based blog",
     "author": "Sven Helmberger",
     "license": "Apache-2.0",
     "type": "module",
