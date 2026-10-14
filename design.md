@@ -112,7 +112,7 @@ nightly server backup holds an offsite copy.
 ```
 ~/static/demo/<slug>/              build output of a demo, tool or variant
 ~/static/thumbs/<slug>.jpg         card screenshot or painting thumbnail
-~/static/paintings/<slug>.jpg      full-size painting
+~/static/paintings/<slug>.<ext>    full-size painting, as given
 ~/medium/data.json                 offsite copy of the data file
 ```
 
@@ -191,14 +191,15 @@ medium deploy "$@"
 Each painting is an image with a sidecar Markdown file of the same name:
 
 ```
-some-painting.jpg
+some-painting.png    # any format the browser shows: jpg, png, webp, ...
 some-painting.md     # frontmatter (title, date, topics) + description
 ```
 
 `medium add <image>` reads both and does the following:
 
-1. Uploads the image to `paintings/` and a generated thumbnail to
-   `thumbs/`.
+1. Uploads the image unchanged to `paintings/<slug>.<ext>`, keeping
+   its format and size, and a thumbnail generated with `sharp` to
+   `thumbs/<slug>.jpg`.
 2. Upserts the item in the `paintings` category.
 3. Pushes the page.
 
@@ -251,5 +252,5 @@ the data file by hand, followed by a `medium push`.
   the screenshots in the recovery archive, instead of redeploying about
   100 repos. Its `group` field already names each old variant's parent,
   so those 88 deployments become `variants` entries where they are.
-* **Painting image sizes:** the maximum size of the full image and the
-  thumbnail size.
+* **Painting thumbnails:** 1200x750 JPEG like the demo screenshots,
+  either cropped to fill 16:10 or fitted inside it.
