@@ -59,7 +59,8 @@ async function askDetails(slug: string, existing: Item | undefined, video: boole
     };
 }
 
-export async function add(config: Config, images: string[])
+/** With a category, every file goes into it, also one already published; otherwise new files go into the config's categories */
+export async function add(config: Config, images: string[], category?: string)
 {
     if (!images.length)
     {
@@ -79,15 +80,22 @@ export async function add(config: Config, images: string[])
     }
 
     const data = loadData(config.dataFile);
-    const kinds = new Set(images.map(f => VIDEO_FORMATS.includes(path.extname(f).slice(1).toLowerCase()) ? "videos" : "images"));
-    for (const kind of kinds)
+    if (category)
     {
-        const category = config.categories[kind];
-        if (!category)
-        {
-            throw new Error(`set "categories.${kind}" in the config to the category new ${kind} go into`);
-        }
         findCategory(data, category);
+    }
+    else
+    {
+        const kinds = new Set(images.map(f => VIDEO_FORMATS.includes(path.extname(f).slice(1).toLowerCase()) ? "videos" : "images"));
+        for (const kind of kinds)
+        {
+            const name = config.categories[kind];
+            if (!name)
+            {
+                throw new Error(`set "categories.${kind}" in the config to the category new ${kind} go into, or use --category`);
+            }
+            findCategory(data, name);
+        }
     }
     await ensureDirs(config);
 
@@ -126,7 +134,7 @@ export async function add(config: Config, images: string[])
                 variants: [],
                 ...existing,
                 slug,
-                category: existing?.category ?? config.categories[video ? "videos" : "images"]!,
+                category: category ?? existing?.category ?? config.categories[video ? "videos" : "images"]!,
                 topics: details.topics,
                 title: details.title,
                 description: details.description,

@@ -11,7 +11,7 @@ import { shot } from "./commands/shot.ts";
 const USAGE = `usage:
   medium init                                        create or change the config
   medium deploy [variant] [--slug <slug>] [--pick]   deploy the demo in this repo
-  medium add <image>...                              publish paintings
+  medium add [--category <slug>] <file>...           publish paintings and videos
   medium shot <slug> [--pick]                        retake a demo's screenshot
   medium push <page-or-category>... | --all          regenerate list pages
   medium list [category]                             show items and their state`;
@@ -22,6 +22,7 @@ async function main()
         allowPositionals: true,
         options: {
             slug: { type: "string" },
+            category: { type: "string" },
             pick: { type: "boolean", default: false },
             all: { type: "boolean", default: false },
             help: { type: "boolean", short: "h", default: false },
@@ -49,7 +50,7 @@ async function main()
             }
             return deploy(config, { variant: args[0], slug: values.slug, pick: values.pick });
         case "add":
-            return add(config, args);
+            return add(config, args, values.category);
         case "shot":
             if (args.length !== 1)
             {
