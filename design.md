@@ -79,7 +79,10 @@ nightly server backup holds an offsite copy.
             "title": "Gen 59",
             "description": "Markdown",
             "repo": "https://github.com/fforw/gen-59",
-            "variants": ["b", "c"],
+            "variants": [
+                { "slug": "g59-err", "title": "err", "description": "..." },
+                { "slug": "g59-linear" }
+            ],
             "created": "2019-03-02",
             "updated": "2026-10-14",
             "hidden": false
@@ -99,21 +102,25 @@ nightly server backup holds an offsite copy.
 * `topics` are free tags. Nothing renders them yet; they are kept for
   filtering later.
 * `hidden` keeps an item deployed but off the list pages.
+* `variants` are other deployments that belong to the item. Each one
+  is a flat `demo/<variant slug>/` of its own, but has no card: it
+  only shows up as a link on its parent's card. `title` is the link
+  text (default: the slug), `description` its tooltip.
 
 ## Server layout
 
 ```
-~/static/demo/<slug>/              build output of a demo or tool
-~/static/demo/<slug>-<variant>/    a variant's build
+~/static/demo/<slug>/              build output of a demo, tool or variant
 ~/static/thumbs/<slug>.jpg         card screenshot or painting thumbnail
 ~/static/paintings/<slug>.jpg      full-size painting
 ~/medium/data.json                 offsite copy of the data file
 ```
 
-Variants are siblings rather than sub-folders because the demo deploy
-runs `rsync --delete` on `demo/<slug>/`, which would wipe nested
-variants. The screenshots are kept outside the demo folders for the
-same reason.
+Everything under `demo/` is flat. A variant is a sibling of its parent,
+never a sub-folder, because the deploy runs `rsync --delete` on
+`demo/<slug>/`, which would wipe nested variants. Which deployment
+belongs to which parent is recorded only in the data file. The
+screenshots are kept outside the demo folders for the same reason.
 
 ## Demos
 
@@ -162,8 +169,11 @@ medium deploy "$@"
 
 `medium deploy` runs in the repo directory and does the following:
 
-1. Rsyncs `docs/` to `demo/<slug>/`, or to `demo/<slug>-<variant>/` for
-   a variant, with `--delete --exclude=.git --exclude=*.blend` as today.
+1. Rsyncs `docs/` to `demo/<slug>/`, or to `demo/<variant>/` for a
+   variant, with `--delete --exclude=.git --exclude=*.blend` as today.
+   The variant argument is the full deployment name, as with
+   `synch.sh <name>` today. Deploying fails if that name is already an
+   item or another item's variant.
 2. Takes a screenshot of the deployed page with Playwright. Without
    `--pick`, it waits `shot.delay` (and clicks first if `shot.click` is
    set), then saves the frame. With `--pick`, it opens a visible browser
@@ -171,7 +181,7 @@ medium deploy "$@"
    from a generative demo by hand. Variants don't get screenshots.
 3. Rsyncs the screenshot to `thumbs/<slug>.jpg`.
 4. Reads the README and `package.json` and updates the item in the
-   data file, adding the variant name if it is new. It sets `created` on
+   data file, adding the variant to the item if it is new. It sets `created` on
    the first deploy and `updated` on every one, and warns about any
    `ff-medium` values that disagree with the data file.
 5. Pushes the page that the item's category lives on to Ghost.
@@ -215,7 +225,7 @@ the data file by hand, followed by a `medium push`.
   intro. A page with more than one section gets an anchor nav below the
   intro; a page with a single category shows no section heading or nav.
 * Each card shows the screenshot, the title linking to the demo, the
-  rendered description, the variant names as links, and the GitHub
+  rendered description, the variants as links, and the GitHub
   link.
 * The markup and CSS from the old `tools/demos/gallery.mjs`
   (fforw-recovery `a99666a`) are a starting point.
@@ -239,9 +249,7 @@ the data file by hand, followed by a `medium push`.
 * **Migrating the existing demos:** seed the data file from the old
   `tools/demos/demos.json` (descriptions, categories, hidden flags) and
   the screenshots in the recovery archive, instead of redeploying about
-  100 repos.
-* **Old-style variants:** today `synch.sh <name>` replaces the whole
-  slug. Existing alternate deployments need to be mapped either to a
-  parent item plus a variant, or to items of their own.
+  100 repos. Its `group` field already names each old variant's parent,
+  so those 88 deployments become `variants` entries where they are.
 * **Painting image sizes:** the maximum size of the full image and the
   thumbnail size.
