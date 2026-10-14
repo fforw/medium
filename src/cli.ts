@@ -3,11 +3,13 @@ import { parseArgs } from "node:util";
 import { loadConfig } from "./config.ts";
 import { add } from "./commands/add.ts";
 import { deploy } from "./commands/deploy.ts";
+import { init } from "./commands/init.ts";
 import { list } from "./commands/list.ts";
 import { push } from "./commands/push.ts";
 import { shot } from "./commands/shot.ts";
 
 const USAGE = `usage:
+  medium init                                        create or change the config
   medium deploy [variant] [--slug <slug>] [--pick]   deploy the demo in this repo
   medium add <image>...                              publish paintings
   medium shot <slug> [--pick]                        retake a demo's screenshot
@@ -32,6 +34,11 @@ async function main()
         return;
     }
 
+    // init writes the config, so it can't need one
+    if (command === "init")
+    {
+        return init();
+    }
     const config = loadConfig();
     switch (command)
     {

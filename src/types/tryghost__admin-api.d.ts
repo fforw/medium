@@ -22,5 +22,6 @@ declare module "@tryghost/admin-api"
     {
         constructor(options: { url: string, key: string, version: string });
         pages: Resource<GhostPage>;
+        site: { read(): Promise<{ title: string, url: string, version: string }> };
     }
 }
