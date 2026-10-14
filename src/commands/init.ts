@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import GhostAdminAPI from "@tryghost/admin-api";
-import { CONFIG_FILE, DEFAULT_FOLDERS, expandHome, isAdminKey, parseConfig, type Folders } from "../config.ts";
+import { BACKUP_PATH_HINT, CONFIG_FILE, DEFAULT_DATA_BACKUP, DEFAULT_FOLDERS, expandHome, isAdminKey, isBackupPath, parseConfig, type Folders } from "../config.ts";
 import { ask, askUntil, closePrompts } from "../prompt.ts";
 import { run } from "../remote.ts";
 
@@ -128,6 +128,9 @@ export async function init()
         console.log("\nThe data file, the source of truth for what is published:");
         const dataFile = await askUntil("Data file", ex.dataFile ?? "~/Documents/medium-data.json", s => s || undefined, "a file path; ~ is allowed");
 
+        const dataBackup = await askUntil("Copy of it on the ssh host, relative to your home there (empty for none)", ex.dataBackup ?? DEFAULT_DATA_BACKUP,
+            s => isBackupPath(s) ? s : undefined, BACKUP_PATH_HINT);
+
         console.log("\nOptional: the template new demo repos are made from, to warn about its leftovers.");
         const repo = await ask("Template repo URL (empty for none)", ex.starter?.repo ?? "");
         const placeholders = repo ? await askList("Template text a demo README should replace", ex.starter?.placeholders ?? []) : [];
@@ -143,6 +146,15 @@ export async function init()
             static: { ...ex.static, rsync, url: staticUrl, folders },
             dataFile,
         };
+        // Like the folders, only written when it differs from the default
+        if (dataBackup === DEFAULT_DATA_BACKUP)
+        {
+            delete raw.dataBackup;
+        }
+        else
+        {
+            raw.dataBackup = dataBackup;
+        }
         if (!Object.keys(folders).length)
         {
             delete (raw.static as Record<string, unknown>).folders;
