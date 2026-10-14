@@ -174,11 +174,12 @@ medium deploy "$@"
    The variant argument is the full deployment name, as with
    `synch.sh <name>` today. Deploying fails if that name is already an
    item or another item's variant.
-2. Takes a screenshot of the deployed page with Playwright. Without
-   `--pick`, it waits `shot.delay` (and clicks first if `shot.click` is
-   set), then saves the frame. With `--pick`, it opens a visible browser
-   and saves the frame when you press a key, so you can choose the frame
-   from a generative demo by hand. Variants don't get screenshots.
+2. Takes a screenshot of the deployed page with Playwright, at a
+   1200x750 viewport. Without `--pick`, it waits `shot.delay` (and
+   clicks first if `shot.click` is set), then saves the frame. With
+   `--pick`, it opens a visible browser and saves the frame when you
+   press a key, so you can choose the frame from a generative demo by
+   hand. Variants don't get screenshots.
 3. Rsyncs the screenshot to `thumbs/<slug>.jpg`.
 4. Reads the README and `package.json` and updates the item in the
    data file, adding the variant to the item if it is new. It sets `created` on
@@ -192,8 +193,11 @@ Each painting is an image with a sidecar Markdown file of the same name:
 
 ```
 some-painting.png    # any format the browser shows: jpg, png, webp, ...
-some-painting.md     # frontmatter (title, date, topics) + description
+some-painting.md     # frontmatter (title, date, topics, focus) + description
 ```
+
+The sidecar is never rendered anywhere, so unlike a demo's README it
+can carry frontmatter.
 
 `medium add <image>` reads both and does the following:
 
@@ -202,6 +206,21 @@ some-painting.md     # frontmatter (title, date, topics) + description
    `thumbs/<slug>.jpg`.
 2. Upserts the item in the `paintings` category.
 3. Pushes the page.
+
+### Thumbnails
+
+Thumbnails are 1200x750 JPEGs, the same 16:10 at 2x as the demo
+screenshots, so all cards in a grid have the same shape. The painting
+is cropped to fill that frame rather than fitted inside it: the card is
+a teaser, and the full image is one click away.
+
+* By default, `sharp` picks the region with `fit: "cover"` and
+  `position: sharp.strategy.attention`, which favours detail and
+  saturation.
+* When that guesses wrong, `focus: [x, y]` in the sidecar overrides
+  it. `x` and `y` are fractions of the image size, and the crop is
+  centred on that point as far as the image edges allow. This is the
+  painting counterpart of `--pick` for demos.
 
 ## Commands
 
@@ -252,5 +271,3 @@ the data file by hand, followed by a `medium push`.
   the screenshots in the recovery archive, instead of redeploying about
   100 repos. Its `group` field already names each old variant's parent,
   so those 88 deployments become `variants` entries where they are.
-* **Painting thumbnails:** 1200x750 JPEG like the demo screenshots,
-  either cropped to fill 16:10 or fitted inside it.
