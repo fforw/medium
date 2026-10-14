@@ -124,7 +124,7 @@ async function main()
     // No --delete: thumbs/ is shared with the paintings
     const shots = path.join(dir, "build", "demo-shots");
     await ensureDirs(config);
-    await run("rsync", ["-rtz", "--chmod=F644", "--include=*.jpg", "--exclude=*", shots + "/", `${config.static.rsync}/thumbs/`]);
+    await run("rsync", ["-rtz", "--include=*.jpg", "--exclude=*", shots + "/", `${config.static.rsync}/thumbs/`]);
     console.error("uploaded the screenshots, now run: medium push --all");
 }
 

@@ -45,7 +45,7 @@ export async function syncDir(config: Config, local: string, remote: string)
 /** Copies one file to a path under the static root */
 export async function syncFile(config: Config, local: string, remote: string)
 {
-    await run("rsync", ["-tz", "--chmod=F644", local, `${config.static.rsync}/${remote}`]);
+    await run("rsync", ["-tz", local, `${config.static.rsync}/${remote}`]);
 }
 
 /** Keeps the offsite copy of the data file in ~/medium/ on the server */
