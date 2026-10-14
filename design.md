@@ -138,7 +138,9 @@ screenshots are kept outside the demo folders for the same reason.
   strings, including the template's older READMEs ("Simple JS build
   starter for simple, client-only demos." ended up on 19 of the old
   cards).
-* **The GitHub link:** `git remote get-url origin`.
+* **The GitHub link:** `git remote get-url origin`. Deploy warns when
+  that is still `fforw/simple-starter`, since a demo created from the
+  template and never re-pointed would link to the template.
 * **An `ff-medium` field in `package.json`** for everything else:
 
   ```json
