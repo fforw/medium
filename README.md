@@ -34,6 +34,10 @@ contains the Admin API key, so make it readable only by you
     "starter": {
         "repo": "https://github.com/me/demo-template",
         "placeholders": ["Demo Template", "A template for demos"]
+    },
+    "categories": {
+        "images": "paintings",
+        "videos": "videos"
     }
 }
 ```
@@ -54,6 +58,9 @@ contains the Admin API key, so make it readable only by you
   `starter.repo`, or its README still contains one of the
   `placeholders`, the template's own text. Without it, there are no
   such warnings.
+* `categories` (optional): the categories `medium add` files new
+  images (`images`) and videos (`videos`) under. Each one is needed
+  once you add that kind of file.
 
 ## Data file
 
@@ -98,8 +105,8 @@ categories:
   deployed but off the page. Changing an item's `category` moves it.
 
 New demos name their category in their `package.json` (see
-design.md). `medium add` puts new paintings into the `paintings`
-category and new videos into `animations`, so the data file needs
+design.md). `medium add` puts new images and videos into the
+categories named in the config's `categories`, so the data file needs
 those categories before the first one is added.
 
 After editing the data file by hand, run `medium push` for the pages

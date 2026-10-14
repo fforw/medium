@@ -46,14 +46,20 @@ committed:
             "Simple TypeScript build starter for simple, client-only demos",
             "Simple JS build starter for simple, client-only demos"
         ]
+    },
+    "categories": {
+        "images": "paintings",
+        "videos": "animations"
     }
 }
 ```
 
 `starter` names the template demo repos are made from, and the text
 in its READMEs that a demo should have replaced; deploy warns about
-both (see Demos). It is optional: without it there is nothing to
-warn about.
+both (see Demos). `categories` names the categories `medium add` files
+new paintings and videos under. Both are optional: without `starter`
+there is nothing to warn about, and without `categories` `medium add`
+asks for it.
 
 ## Data file
 
@@ -243,15 +249,15 @@ removed from its title:
 
 When the painting is already in the data file, the stored values are
 the defaults instead, so re-adding an image to replace it is a matter
-of pressing Enter. The answers go into the item in the `paintings`
-category, which also records the image's extension and the focus.
+of pressing Enter. The answers go into the item in the config's
+`categories.images` category (`paintings` here), which also records the image's extension and the focus.
 
 It then does the following:
 
 1. Uploads the image unchanged to `paintings/<slug>.<ext>`, keeping
    its format and size, and a thumbnail generated with `sharp` to
    `thumbs/<slug>.jpg`.
-2. Upserts the item in the `paintings` category.
+2. Upserts the item in that category.
 3. Pushes the page.
 
 With several images, it asks for each one in turn and pushes the page
@@ -286,7 +292,7 @@ paintings' with one more:
 
 The thumbnail is that frame, grabbed with `ffmpeg` and then cropped
 like a painting, so `focus` works the same way. New videos go into
-the `animations` category, which, like any category, can share a page
+the config's `categories.videos` category (`animations` here), which, like any category, can share a page
 with others; the files themselves still live in `videos/`.
 
 ### The viewer

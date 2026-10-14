@@ -51,9 +51,6 @@ export interface Data
     items: Item[];
 }
 
-export const PAINTINGS = "paintings";
-export const ANIMATIONS = "animations";
-
 export const IMAGE_FORMATS = ["jpg", "jpeg", "png", "webp", "gif", "avif"];
 export const VIDEO_FORMATS = ["mp4", "webm"];
 

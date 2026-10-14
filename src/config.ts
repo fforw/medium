@@ -9,6 +9,8 @@ export interface Config
     dataFile: string;
     /** The template new demo repos are made from, so leftovers of it can be pointed out */
     starter: { repo?: string, placeholders: string[] };
+    /** The categories medium add files new images and videos under */
+    categories: { images?: string, videos?: string };
 }
 
 export const CONFIG_FILE = path.join(os.homedir(), ".config", "medium", "config.json");
@@ -63,6 +65,7 @@ export function loadConfig(): Config
     }
     config.starter = optional(config, "starter", { repo: "string", placeholders: "string[]" });
     config.starter.placeholders ??= [];
+    config.categories = optional(config, "categories", { images: "string", videos: "string" });
     config.ghost.url = config.ghost.url.replace(/\/+$/, "");
     config.static.url = config.static.url.replace(/\/+$/, "");
     config.static.rsync = config.static.rsync.replace(/\/+$/, "");

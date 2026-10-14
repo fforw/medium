@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import type { Config } from "../config.ts";
-import { ANIMATIONS, deploymentOwner, findCategory, IMAGE_FORMATS, isVideo, loadData, mediaFolder, PAINTINGS, saveData, today, VIDEO_FORMATS, type Item } from "../data.ts";
+import { deploymentOwner, findCategory, IMAGE_FORMATS, isVideo, loadData, mediaFolder, saveData, today, VIDEO_FORMATS, type Item } from "../data.ts";
 import { grabFrame } from "../frame.ts";
 import { pagesFor, pushPages } from "../ghost.ts";
 import { closePrompts, ask } from "../prompt.ts";
@@ -92,13 +92,15 @@ export async function add(config: Config, images: string[])
     }
 
     const data = loadData(config.dataFile);
-    if (images.some(f => IMAGE_FORMATS.includes(path.extname(f).slice(1).toLowerCase())))
+    const kinds = new Set(images.map(f => VIDEO_FORMATS.includes(path.extname(f).slice(1).toLowerCase()) ? "videos" : "images"));
+    for (const kind of kinds)
     {
-        findCategory(data, PAINTINGS);
-    }
-    if (images.some(f => VIDEO_FORMATS.includes(path.extname(f).slice(1).toLowerCase())))
-    {
-        findCategory(data, ANIMATIONS);
+        const category = config.categories[kind];
+        if (!category)
+        {
+            throw new Error(`set "categories.${kind}" in the config to the category new ${kind} go into`);
+        }
+        findCategory(data, category);
     }
     await ensureDirs(config);
 
@@ -137,7 +139,7 @@ export async function add(config: Config, images: string[])
                 variants: [],
                 ...existing,
                 slug,
-                category: existing?.category ?? (video ? ANIMATIONS : PAINTINGS),
+                category: existing?.category ?? config.categories[video ? "videos" : "images"]!,
                 topics: details.topics,
                 title: details.title,
                 description: details.description,
