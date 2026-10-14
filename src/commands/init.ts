@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import GhostAdminAPI from "@tryghost/admin-api";
-import { CONFIG_FILE, expandHome, isAdminKey, parseConfig } from "../config.ts";
+import { CONFIG_FILE, DEFAULT_FOLDERS, expandHome, isAdminKey, parseConfig, type Folders } from "../config.ts";
 import { ask, askUntil, closePrompts } from "../prompt.ts";
 import { run } from "../remote.ts";
 
@@ -107,6 +107,24 @@ export async function init()
             s => /^[^:/\s]+:\S*$/.test(s) ? s : undefined, "an ssh host and a path, like myhost:static");
         const staticUrl = await askUntil("Public URL of that directory", ex.static?.url ?? `${url}/static`, parseUrl, "a URL like https://blog.example.com/static");
 
+        console.log("\nThe folders below that directory:");
+        const folders: Partial<Folders> = {};
+        for (const [key, question] of [
+            ["demos", "Demo deployments"],
+            ["thumbs", "Card thumbnails"],
+            ["images", "Images added with medium add"],
+            ["videos", "Videos added with medium add"],
+        ] as const)
+        {
+            const value = await askUntil(question, ex.static?.folders?.[key] ?? DEFAULT_FOLDERS[key],
+                s => s.replace(/^\/+|\/+$/g, "") || undefined, "a folder name, relative to the static directory");
+            // Only what differs from the defaults is written, so the config stays short
+            if (value !== DEFAULT_FOLDERS[key])
+            {
+                folders[key] = value;
+            }
+        }
+
         console.log("\nThe data file, the source of truth for what is published:");
         const dataFile = await askUntil("Data file", ex.dataFile ?? "~/Documents/medium-data.json", s => s || undefined, "a file path; ~ is allowed");
 
@@ -122,9 +140,13 @@ export async function init()
         const raw: Record<string, unknown> = {
             ...ex,
             ghost: { ...ex.ghost, url, adminKey },
-            static: { ...ex.static, rsync, url: staticUrl },
+            static: { ...ex.static, rsync, url: staticUrl, folders },
             dataFile,
         };
+        if (!Object.keys(folders).length)
+        {
+            delete (raw.static as Record<string, unknown>).folders;
+        }
         delete raw.starter;
         delete raw.categories;
         if (repo)
