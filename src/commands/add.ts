@@ -5,7 +5,7 @@ import type { Config } from "../config.ts";
 import { deploymentOwner, findCategory, IMAGE_FORMATS, isVideo, loadData, mediaFolder, saveData, today, VIDEO_FORMATS, type Item } from "../data.ts";
 import { grabFrame } from "../frame.ts";
 import { pagesFor, pushPages } from "../ghost.ts";
-import { closePrompts, ask } from "../prompt.ts";
+import { ask, askUntil, closePrompts } from "../prompt.ts";
 import { backupData, ensureDirs, syncFile } from "../remote.ts";
 import { makeThumb } from "../thumb.ts";
 
@@ -15,19 +15,6 @@ const FORMATS = [...IMAGE_FORMATS, ...VIDEO_FORMATS];
 export function titleCase(slug: string): string
 {
     return slug.split(/[-_.\s]+/).filter(Boolean).map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
-}
-
-async function askUntil<T>(question: string, def: string, parse: (s: string) => T | undefined, hint: string): Promise<T>
-{
-    for (;;)
-    {
-        const value = parse(await ask(question, def));
-        if (value !== undefined)
-        {
-            return value;
-        }
-        console.log(`  ${hint}`);
-    }
 }
 
 function parseDate(s: string): string | undefined
