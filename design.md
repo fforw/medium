@@ -108,6 +108,10 @@ nightly server backup holds an offsite copy.
   `<static.url>/demo/<variant slug>/`, built from the slug like an
   item's, so no URL is stored. `title` is the link text (default: the
   slug), `description` its tooltip.
+* A deploy only adds a new variant as `{ "slug": ... }`, since it has
+  no README of its own. A title or tooltip is added by hand in the
+  data file, followed by a `medium push`. The migrated variants bring
+  their descriptions from the old `demos.json`.
 
 ## Server layout
 
