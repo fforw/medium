@@ -260,12 +260,12 @@ the data file by hand, followed by a `medium push`.
   for the painting sidecars, `marked`, and `sharp` for the painting
   thumbnails.
 * Uses the system `rsync` and `ssh`.
+* Installed with `pnpm link --global` from a local checkout, so every
+  change is live without publishing to npm. `synch.sh` just expects
+  `medium` on the `PATH`.
 
 ## Open questions
 
-* **Installing medium:** `pnpm add -g @fforw/medium` from npm, or
-  `pnpm link --global` from a local checkout. `synch.sh` just expects
-  `medium` on the `PATH`.
 * **Migrating the existing demos:** seed the data file from the old
   `tools/demos/demos.json` (descriptions, categories, hidden flags) and
   the screenshots in the recovery archive, instead of redeploying about
