@@ -334,7 +334,7 @@ later, but isn't needed.
 |---|---|
 | `medium init` | Asks for the config settings and writes the config file, creates the data file if needed, and checks the Ghost key and ssh |
 | `medium deploy [variant] [--slug <slug>] [--pick]` | Deploys the demo in the current repo, as described above |
-| `medium add <file>...` | Publishes paintings and videos |
+| `medium add [--category <slug>] <file>...` | Publishes paintings and videos, into the config's `categories` or the one given |
 | `medium shot <slug> [--pick]` | Retakes the screenshot of a deployed demo, with the `shot` settings of the repo it is run in, if that is the demo's |
 | `medium push [page-or-category...]` / `--all` | Regenerates list pages from the data file; a category pushes the whole page it lives on |
 | `medium list [category]` | Shows items and their state |

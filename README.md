@@ -123,7 +123,9 @@ your pages and categories:
 New demos name their category in their `package.json` (see
 design.md). `medium add` puts new images and videos into the
 categories named in the config's `categories`, so the data file needs
-those categories before the first one is added.
+those categories before the first one is added. `--category <slug>`
+puts all the files of one `medium add` into that category instead,
+including ones already published, which moves them there.
 
 After editing the data file by hand, run `medium push` for the pages
 you changed, or `medium push --all`.
@@ -132,7 +134,7 @@ you changed, or `medium push --all`.
 
     medium init                                        create or change the config
     medium deploy [variant] [--slug <slug>] [--pick]   deploy the demo in this repo
-    medium add <file>...                               publish paintings and videos
+    medium add [--category <slug>] <file>...           publish paintings and videos
     medium shot <slug> [--pick]                        retake a demo's screenshot
     medium push <page-or-category>... | --all          regenerate list pages
     medium list [category]                             show items and their state
