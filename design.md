@@ -273,9 +273,9 @@ paintings' with one more:
 | Frame | `1`: the second of the video the thumbnail is taken from |
 
 The thumbnail is that frame, grabbed with `ffmpeg` and then cropped
-like a painting, so `focus` works the same way. Videos go into the
-`videos` category, which, like any category, can share a page with
-others.
+like a painting, so `focus` works the same way. New videos go into
+the `animations` category, which, like any category, can share a page
+with others; the files themselves still live in `videos/`.
 
 ### The viewer
 
