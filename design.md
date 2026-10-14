@@ -16,8 +16,9 @@ which medium creates and updates through the Ghost Admin API.
   made to them in Ghost's editor is overwritten.
 * **One source per field.** Demo titles and descriptions come from the
   demo's README and are re-read on every deploy. Screenshot settings
-  come from its `package.json`. Paintings get theirs
-  from a sidecar `.md`. Everything else lives in the data file.
+  come from its `package.json`. Paintings have no repo, so `medium add`
+  asks for theirs and stores them in the data file, like everything
+  else.
 * **Descriptions are used as-is.** The Markdown is rendered to HTML and
   put on the card unchanged. Keeping it short, or linking to a blog post
   for more, is up to the author.
@@ -205,23 +206,36 @@ medium deploy "$@"
 
 ## Paintings
 
-Each painting is an image with a sidecar Markdown file of the same name:
+A painting is just an image file, in any format the browser shows
+(jpg, png, webp, ...). Its slug is the file name without the
+extension.
 
-```
-some-painting.png    # any format the browser shows: jpg, png, webp, ...
-some-painting.md     # frontmatter (title, date, topics, focus) + description
-```
+`medium add <image>` asks for the painting's details on the terminal,
+one prompt per field, each with a default you accept with Enter:
 
-The sidecar is never rendered anywhere, so unlike a demo's README it
-can carry frontmatter.
+| Prompt | Default |
+|---|---|
+| Title | the slug with dashes as spaces, in title case (`some-painting` becomes "Some Painting") |
+| Date | today |
+| Topics | none |
+| Description | none; one line of Markdown |
+| Focus | none, i.e. `sharp`'s guess (see below) |
 
-`medium add <image>` reads both and does the following:
+When the painting is already in the data file, the stored values are
+the defaults instead, so re-adding an image to replace it is a matter
+of pressing Enter. The answers go into the item in the `paintings`
+category, which also records the image's extension and the focus.
+
+It then does the following:
 
 1. Uploads the image unchanged to `paintings/<slug>.<ext>`, keeping
    its format and size, and a thumbnail generated with `sharp` to
    `thumbs/<slug>.jpg`.
 2. Upserts the item in the `paintings` category.
 3. Pushes the page.
+
+With several images, it asks for each one in turn and pushes the page
+once at the end.
 
 ### Thumbnails
 
@@ -233,8 +247,8 @@ a teaser, and the full image is one click away.
 * By default, `sharp` picks the region with `fit: "cover"` and
   `position: sharp.strategy.attention`, which favours detail and
   saturation.
-* When that guesses wrong, `focus: [x, y]` in the sidecar overrides
-  it. `x` and `y` are fractions of the image size, and the crop is
+* When that guesses wrong, a focus point `x, y` given at the prompt
+  overrides it. `x` and `y` are fractions of the image size, and the crop is
   centred on that point as far as the image edges allow. This is the
   painting counterpart of `--pick` for demos.
 
@@ -272,9 +286,9 @@ the data file by hand, followed by a `medium push`.
 ## Implementation
 
 * Node, ESM, TypeScript, built with pnpm.
-* Dependencies: `@tryghost/admin-api`, `playwright`, `gray-matter`
-  for the painting sidecars, `marked`, and `sharp` for the painting
-  thumbnails.
+* Dependencies: `@tryghost/admin-api`, `playwright`, `marked`, and
+  `sharp` for the painting thumbnails. The `medium add` prompts use
+  Node's own `readline`.
 * Uses the system `rsync` and `ssh`.
 * Installed with `pnpm link --global` from a local checkout, so every
   change is live without publishing to npm. `synch.sh` just expects
