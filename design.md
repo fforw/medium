@@ -104,8 +104,10 @@ nightly server backup holds an offsite copy.
 * `hidden` keeps an item deployed but off the list pages.
 * `variants` are other deployments that belong to the item. Each one
   is a flat `demo/<variant slug>/` of its own, but has no card: it
-  only shows up as a link on its parent's card. `title` is the link
-  text (default: the slug), `description` its tooltip.
+  only shows up as a link on its parent's card. The link goes to
+  `<static.url>/demo/<variant slug>/`, built from the slug like an
+  item's, so no URL is stored. `title` is the link text (default: the
+  slug), `description` its tooltip.
 
 ## Server layout
 
