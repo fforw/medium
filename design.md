@@ -132,6 +132,12 @@ screenshots are kept outside the demo folders for the same reason.
 * **The title:** the README's first `# heading`, or the slug if there
   is none.
 * **The description:** the README body, minus the title heading.
+
+  Deploy warns, but still deploys, when the title or body is still
+  simple-starter's placeholder text. medium keeps a short list of those
+  strings, including the template's older READMEs ("Simple JS build
+  starter for simple, client-only demos." ended up on 19 of the old
+  cards).
 * **The GitHub link:** `git remote get-url origin`.
 * **An `ff-medium` field in `package.json`** for everything else:
 
@@ -153,7 +159,9 @@ screenshots are kept outside the demo folders for the same reason.
   authoritative after the first deploy. Later deploys warn when
   `package.json` disagrees with the data file but don't change it.
   There is no default `category`: the first deploy of an unknown item
-  fails with a message listing the known categories.
+  fails with a message listing the known categories. An empty string
+  counts as missing, so simple-starter can ship `"category": ""` to
+  show where it goes.
 
 ### `synch.sh [variant] [--pick]`
 
