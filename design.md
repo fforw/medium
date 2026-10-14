@@ -15,7 +15,8 @@ which medium creates and updates through the Ghost Admin API.
   Every push regenerates the affected list pages completely, so any edit
   made to them in Ghost's editor is overwritten.
 * **One source per field.** Demo titles and descriptions come from the
-  demo's README and are re-read on every deploy. Paintings get theirs
+  demo's README and are re-read on every deploy. Screenshot settings
+  come from its `package.json`. Paintings get theirs
   from a sidecar `.md`. Everything else lives in the data file.
 * **Descriptions are used as-is.** The Markdown is rendered to HTML and
   put on the card unchanged. Keeping it short, or linking to a blog post
@@ -121,21 +122,27 @@ same reason.
 * **The slug:** the repo folder name.
 * **The title:** the README's first `# heading`, or the slug if there
   is none.
-* **The description:** the README body, minus the frontmatter and the
-  title heading.
+* **The description:** the README body, minus the title heading.
 * **The GitHub link:** `git remote get-url origin`.
-* **Optional flat frontmatter** in `README.md`, which GitHub shows as a
-  table:
+* **An `ff-medium` field in `package.json`** for everything else:
 
-  ```markdown
-  ---
-  category: tools
-  topics: [generative, webgl]
-  shot-delay: 2000
-  shot-click: true
-  ---
+  ```json
+  "ff-medium": {
+      "category": "generative",
+      "topics": ["webgl"],
+      "shot": { "delay": 2000, "click": true }
+  }
   ```
 
+  Not README frontmatter, because GitHub renders that as a table at
+  the top of the repo page. Not `keywords`, because they are flat
+  strings meant as npm search tags. npm and pnpm ignore unknown fields,
+  and the `ff-` prefix keeps the key clear of other tools. Unknown keys
+  inside `ff-medium` are an error, so typos don't go unnoticed.
+
+  `category` and `topics` only seed a new item: the data file is
+  authoritative after the first deploy. Later deploys warn when
+  `package.json` disagrees with the data file but don't change it.
   There is no default `category`: the first deploy of an unknown item
   fails with a message listing the known categories.
 
@@ -156,14 +163,15 @@ medium deploy "$@"
 1. Rsyncs `docs/` to `demo/<slug>/`, or to `demo/<slug>-<variant>/` for
    a variant, with `--delete --exclude=.git --exclude=*.blend` as today.
 2. Takes a screenshot of the deployed page with Playwright. Without
-   `--pick`, it waits `shot-delay` (and clicks first if `shot-click` is
+   `--pick`, it waits `shot.delay` (and clicks first if `shot.click` is
    set), then saves the frame. With `--pick`, it opens a visible browser
    and saves the frame when you press a key, so you can choose the frame
    from a generative demo by hand. Variants don't get screenshots.
 3. Rsyncs the screenshot to `thumbs/<slug>.jpg`.
-4. Reads the README and updates the item in the data file, adding the
-   variant name if it is new. It sets `created` on the first deploy and
-   `updated` on every one.
+4. Reads the README and `package.json` and updates the item in the
+   data file, adding the variant name if it is new. It sets `created` on
+   the first deploy and `updated` on every one, and warns about any
+   `ff-medium` values that disagree with the data file.
 5. Pushes the page that the item's category lives on to Ghost.
 
 ## Paintings
@@ -216,8 +224,9 @@ the data file by hand, followed by a `medium push`.
 ## Implementation
 
 * Node, ESM, TypeScript, built with pnpm.
-* Dependencies: `@tryghost/admin-api`, `playwright`, `gray-matter`,
-  `marked`, and `sharp` for the painting thumbnails.
+* Dependencies: `@tryghost/admin-api`, `playwright`, `gray-matter`
+  for the painting sidecars, `marked`, and `sharp` for the painting
+  thumbnails.
 * Uses the system `rsync` and `ssh`.
 
 ## Open questions
