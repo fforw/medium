@@ -8,8 +8,9 @@ which medium creates and updates through the Ghost Admin API.
 ## Principles
 
 * **Files in `/static/`, lists in Ghost.** There are no Ghost posts per
-  item. Each item is a folder or image under `~/static/`, and each
-  category is one Ghost page that lists its items as cards.
+  item. Each item is a folder or image under `~/static/`, and each list
+  page is one Ghost page that shows its categories as sections of
+  cards.
 * **The local data file is the source of truth.** Ghost only shows it.
   Every push regenerates the affected list pages completely, so any edit
   made to them in Ghost's editor is overwritten.
@@ -48,19 +49,32 @@ nightly server backup holds an offsite copy.
 
 ```json
 {
-    "categories": [
+    "pages": [
         {
             "slug": "demos",
             "title": "Demos",
-            "intro": "Markdown shown above the cards",
+            "intro": "Markdown shown above the section nav"
+        }
+    ],
+    "categories": [
+        {
+            "slug": "generative",
+            "title": "Generative",
+            "intro": "Markdown shown above the section's cards",
+            "page": "demos"
+        },
+        {
+            "slug": "realtime",
+            "title": "Realtime & shaders",
+            "intro": "...",
             "page": "demos"
         }
     ],
     "items": [
         {
             "slug": "gen-59",
-            "category": "demos",
-            "topics": ["generative"],
+            "category": "generative",
+            "topics": ["webgl"],
             "title": "Gen 59",
             "description": "Markdown",
             "repo": "https://github.com/fforw/gen-59",
@@ -73,10 +87,16 @@ nightly server backup holds an offsite copy.
 }
 ```
 
-* `page` is the Ghost page slug that the category renders to. Splitting
-  demos into topic pages later only changes the data, not the tool.
-* Items reference their category by slug, so moving an item is a
-  one-field edit.
+* `pages[].slug` is the Ghost page slug. The page's title and intro
+  belong to no single section, so they live here.
+* `categories[].page` names the page a category renders to. Several
+  categories can share a page; each becomes a section on it, in array
+  order. Giving a category its own page later only changes the data,
+  not the tool.
+* Items reference their category by slug, so moving an item, even to
+  another page, is a one-field edit.
+* `topics` are free tags. Nothing renders them yet; they are kept for
+  filtering later.
 * `hidden` keeps an item deployed but off the list pages.
 
 ## Server layout
@@ -116,7 +136,8 @@ same reason.
   ---
   ```
 
-  `category` defaults to `demos`.
+  There is no default `category`: the first deploy of an unknown item
+  fails with a message listing the known categories.
 
 ### `synch.sh [variant] [--pick]`
 
@@ -143,7 +164,7 @@ medium deploy "$@"
 4. Reads the README and updates the item in the data file, adding the
    variant name if it is new. It sets `created` on the first deploy and
    `updated` on every one.
-5. Pushes the item's category page to Ghost.
+5. Pushes the page that the item's category lives on to Ghost.
 
 ## Paintings
 
@@ -168,25 +189,29 @@ some-painting.md     # frontmatter (title, date, topics) + description
 | `medium deploy [variant] [--pick]` | Deploys the demo in the current repo, as described above |
 | `medium add <image>...` | Publishes paintings |
 | `medium shot <slug> [--pick]` | Retakes the screenshot of a deployed demo |
-| `medium push [category...]` / `--all` | Regenerates list pages from the data file |
+| `medium push [page-or-category...]` / `--all` | Regenerates list pages from the data file; a category pushes the whole page it lives on |
 | `medium list [category]` | Shows items and their state |
 
-Hiding items, moving them and editing categories are done in the data
-file by hand, followed by a `medium push`.
+Hiding items, moving them and editing pages and categories are done in
+the data file by hand, followed by a `medium push`.
 
 ## Rendering list pages
 
-* Each category page is a single Ghost HTML card (Lexical `html` node),
+* Each list page is a single Ghost HTML card (Lexical `html` node),
   so Ghost doesn't reformat the markup. The CSS is inline and scoped to
   the gallery container.
+* The page intro comes first. Each category on the page follows as a
+  `<section id="<category slug>">` with its title as heading and its
+  intro. A page with more than one section gets an anchor nav below the
+  intro; a page with a single category shows no section heading or nav.
 * Each card shows the screenshot, the title linking to the demo, the
   rendered description, the variant names as links, and the GitHub
   link.
 * The markup and CSS from the old `tools/demos/gallery.mjs`
   (fforw-recovery `a99666a`) are a starting point.
 * When a page is updated, medium sends the page's current `updated_at`
-  back, as Ghost requires. It only ever touches the pages named in
-  `categories[].page`.
+  back, as Ghost requires. It only ever touches the pages listed in
+  `pages`.
 
 ## Implementation
 
