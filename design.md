@@ -274,14 +274,26 @@ the data file by hand, followed by a `medium push`.
   change is live without publishing to npm. `synch.sh` just expects
   `medium` on the `PATH`.
 
-## Open questions
+## Migration
 
-* **Migrating the existing demos:** seed the data file from the old
-  `tools/demos/demos.json` (descriptions, categories, hidden flags) and
-  the screenshots in the recovery archive, instead of redeploying about
-  100 repos. Its `group` field already names each old variant's parent,
-  so those 88 deployments become `variants` entries where they are.
-  Migrated descriptions stay until a demo is redeployed, which re-reads
-  its README as usual. Many READMEs are missing, still the
-  simple-starter template text, or full of setup notes; they are fixed
-  one by one when their demo is touched again, not up front.
+A one-off script seeds the data file and the server from the
+fforw-recovery archive (`a99666a`), instead of redeploying about 100
+repos:
+
+* **Items** come from `tools/demos/demos.json`: title, description,
+  category, hidden flag and GitHub link. The old categories
+  (`generative`, `realtime`, `experiments`, `games`, `tools`) map one
+  to one onto the new ones.
+* **Variants:** the old `group` field names each variant's parent, so
+  those 88 deployments become `variants` entries where they are, with
+  their title and description as link text and tooltip.
+* **Dates:** `created` is the real `date` from `inventory.json`, or
+  `<year>-01-01` from `demos.json` where there is none.
+* **Screenshots:** the 221 old shots in `build/demo-shots/` are copied
+  to `thumbs/<slug>.jpg`. The old pages took them from Ghost uploads,
+  which the new pages don't use.
+
+Migrated descriptions stay until a demo is redeployed, which re-reads
+its README as usual. Many READMEs are missing, still the simple-starter
+template text, or full of setup notes; they are fixed one by one when
+their demo is touched again, not up front.
