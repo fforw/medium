@@ -116,8 +116,7 @@ nightly server backup holds an offsite copy.
   slug), `description` its tooltip.
 * A deploy only adds a new variant as `{ "slug": ... }`, since it has
   no README of its own. A title or tooltip is added by hand in the
-  data file, followed by a `medium push`. The migrated variants bring
-  their descriptions from the old `demos.json`.
+  data file, followed by a `medium push`.
 
 ## Server layout
 
@@ -354,33 +353,3 @@ the data file by hand, followed by a `medium push`.
   `link --global`, and `pnpm add -g` would put the sources under
   `node_modules`, where Node won't strip types. `synch.sh` just expects
   `medium` on the `PATH`.
-
-## Migration
-
-A one-off script seeds the data file and the server from the
-fforw-recovery archive (`a99666a`), instead of redeploying about 100
-repos:
-
-* **Items** come from `tools/demos/demos.json`: title, description,
-  category, hidden flag and GitHub link. The old categories
-  (`generative`, `realtime`, `experiments`, `games`, `tools`) map one
-  to one onto the new ones.
-* **Variants:** the old `group` field names each variant's parent, so
-  those 88 deployments become `variants` entries where they are, with
-  their title and description as link text and tooltip. The 8 hidden
-  ones stay hidden.
-* **Dates:** `created` is the real `date` from `inventory.json`, or
-  `<year>-01-01` from `demos.json` where there is none.
-* **Screenshots:** the 221 old shots in `build/demo-shots/` are copied
-  to `thumbs/<slug>.jpg`. The old pages took them from Ghost uploads,
-  which the new pages don't use.
-
-The data file starts with three pages: `demos` with the old four
-sections, and `tools` and `paintings` with one category each. The
-script is `scripts/migrate.ts`; `--dry-run` prints the data file
-without writing or uploading anything.
-
-Migrated descriptions stay until a demo is redeployed, which re-reads
-its README as usual. Many READMEs are missing, still the simple-starter
-template text, or full of setup notes; they are fixed one by one when
-their demo is touched again, not up front.
