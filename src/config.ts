@@ -47,9 +47,19 @@ export function loadConfig(): Config
 {
     if (!fs.existsSync(CONFIG_FILE))
     {
-        throw new Error(`no config at ${CONFIG_FILE}, see the README`);
+        throw new Error(`no config at ${CONFIG_FILE}, run "medium init"`);
     }
-    const config = JSON.parse(fs.readFileSync(CONFIG_FILE, "utf8"));
+    return parseConfig(JSON.parse(fs.readFileSync(CONFIG_FILE, "utf8")));
+}
+
+/** Checks a config as read from the file, and normalizes it for use */
+export function parseConfig(raw: unknown): Config
+{
+    const config = structuredClone(raw) as Record<string, any>;
+    if (typeof config !== "object" || config === null)
+    {
+        throw new Error(`${CONFIG_FILE}: must be a JSON object`);
+    }
     for (const key of ["ghost.url", "ghost.adminKey", "static.rsync", "static.url", "dataFile"])
     {
         const value = key.split(".").reduce((o, k) => o?.[k], config);
@@ -58,8 +68,7 @@ export function loadConfig(): Config
             throw new Error(`${CONFIG_FILE}: "${key}" is missing`);
         }
     }
-    // The client's own check is unanchored, so a key with extra text around it gets as far as the server
-    if (!/^[0-9a-f]{24}:[0-9a-f]{64}$/.test(config.ghost.adminKey))
+    if (!isAdminKey(config.ghost.adminKey))
     {
         throw new Error(`${CONFIG_FILE}: "ghost.adminKey" must be Ghost's Admin API key, <24 hex>:<64 hex>`);
     }
@@ -70,5 +79,11 @@ export function loadConfig(): Config
     config.static.url = config.static.url.replace(/\/+$/, "");
     config.static.rsync = config.static.rsync.replace(/\/+$/, "");
     config.dataFile = expandHome(config.dataFile);
-    return config;
+    return config as Config;
+}
+
+/** The admin-api client's own check is unanchored, so a key with extra text around it gets as far as the server */
+export function isAdminKey(key: string): boolean
+{
+    return /^[0-9a-f]{24}:[0-9a-f]{64}$/.test(key);
 }
