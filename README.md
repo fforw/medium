@@ -8,7 +8,7 @@ for how it works.
 ## Setup
 
     pnpm install
-    pnpm link --global
+    ln -s "$PWD/src/cli.ts" ~/bin/medium    # any folder on the PATH
 
 Then create `~/.config/medium/config.json` (`chmod 600`) as described
 in design.md. The sources run directly with Node 24's type stripping,

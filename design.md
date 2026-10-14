@@ -303,8 +303,11 @@ the data file by hand, followed by a `medium push`.
   with `ssh mkdir -p` first.
 * Runs the TypeScript sources directly with Node's type stripping, so
   there is no build step; `pnpm typecheck` runs `tsc`.
-* Installed with `pnpm link --global` from a local checkout, so every
-  change is live without publishing to npm. `synch.sh` just expects
+* Installed by symlinking `src/cli.ts` from a local checkout into a
+  folder on the `PATH` (`ln -s .../src/cli.ts ~/bin/medium`), so every
+  change is live without publishing to npm. pnpm 12 has no
+  `link --global`, and `pnpm add -g` would put the sources under
+  `node_modules`, where Node won't strip types. `synch.sh` just expects
   `medium` on the `PATH`.
 
 ## Migration
