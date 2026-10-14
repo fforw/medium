@@ -36,7 +36,10 @@ committed. `medium init` writes it from prompts:
     },
     "static": {
         "rsync": "myweb:static",
-        "url": "https://fforw.de/static"
+        "url": "https://fforw.de/static",
+        "folders": {
+            "images": "paintings"
+        }
     },
     "dataFile": "~/Documents/fforw/medium-data.json",
     "starter": {
@@ -146,6 +149,11 @@ nightly server backup holds an offsite copy.
 ~/static/videos/<slug>.<ext>       video, as given
 ~/medium/data.json                 offsite copy of the data file
 ```
+
+The folder names below the static directory come from the config's
+`static.folders`; the defaults are `demo`, `thumbs`, `images` and
+`videos`. This layout is fforw.de's, which sets `images` to
+`paintings`.
 
 Everything under `demo/` is flat. A variant is a sibling of its parent,
 never a sub-folder, because the deploy runs `rsync --delete` on

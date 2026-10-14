@@ -35,7 +35,10 @@ The file can also be written by hand:
     },
     "static": {
         "rsync": "myhost:static",
-        "url": "https://blog.example.com/static"
+        "url": "https://blog.example.com/static",
+        "folders": {
+            "images": "paintings"
+        }
     },
     "dataFile": "~/Documents/medium-data.json",
     "starter": {
@@ -54,8 +57,12 @@ The file can also be written by hand:
   Admin, Settings, Integrations). Not the Content API key.
 * `static.rsync`: where the files go, as `host:path`. The host is an
   ssh host, e.g. an alias from `~/.ssh/config`; the path is relative
-  to your home directory there. medium creates `demo/`, `thumbs/`,
-  `paintings/` and `videos/` below it.
+  to your home directory there.
+* `static.folders` (optional): the folders below it that medium writes
+  to and creates: `demos` for demo deployments (default `demo`),
+  `thumbs` for card thumbnails (`thumbs`), and `images` and `videos`
+  for files added with `medium add` (`images`, `videos`). Renaming one
+  later doesn't move what is already uploaded.
 * `static.url`: the public URL of that same directory.
 * `dataFile`: where the data file lives (`~` is allowed). Every push
   also copies it to `~/medium/data.json` on the same host, as an
