@@ -94,9 +94,9 @@ export function saveData(file: string, data: Data)
     fs.renameSync(tmp, file);
 }
 
-export function today(): string
+/** The date in local time as YYYY-MM-DD, today by default */
+export function today(d = new Date()): string
 {
-    const d = new Date();
     const pad = (n: number) => String(n).padStart(2, "0");
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }

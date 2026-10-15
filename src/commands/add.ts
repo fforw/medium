@@ -40,11 +40,13 @@ function parseFrame(s: string): number | undefined
 }
 
 /** Asks for the painting's or video's details, defaulting to the stored ones */
-async function askDetails(slug: string, existing: Item | undefined, video: boolean)
+async function askDetails(image: string, slug: string, existing: Item | undefined, video: boolean)
 {
     console.log(`\n${slug}${existing ? " (already published, the stored values are filled in)" : ""}`);
     const title = await ask("Title", existing?.title ?? titleCase(slug));
-    const created = await askUntil("Date", existing?.created ?? today(), parseDate, "as YYYY-MM-DD");
+    // a painting defaults to its file's mtime, which, unlike the creation time, can be corrected with touch
+    const fallback = video ? today() : today(fs.statSync(image).mtime);
+    const created = await askUntil("Date", existing?.created ?? fallback, parseDate, "as YYYY-MM-DD");
     const topics = await ask("Topics, comma-separated", existing?.topics.join(", "));
     const description = await ask("Description (one line of Markdown)", existing?.description);
     const frame = video ? await askUntil("Frame (second of the video for the thumbnail)", String(existing?.frame ?? 1), parseFrame, "a number of seconds, like 1 or 2.5") : undefined;
@@ -118,7 +120,7 @@ export async function add(config: Config, images: string[], category?: string)
                 throw new Error(`"${slug}" is already a ${video ? "painting" : "video"}`);
             }
             const existing = owner?.item;
-            const details = await askDetails(slug, existing, video);
+            const details = await askDetails(image, slug, existing, video);
 
             let source = image;
             if (video)
