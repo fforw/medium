@@ -12,7 +12,8 @@
         "node": ">=24"
     },
     "scripts": {
-        "typecheck": "tsc"
+        "typecheck": "tsc",
+        "test": "node --test 'src/**/*.test.ts'"
     },
     "packageManager": "pnpm@12.8.1",
     "dependencies": {
