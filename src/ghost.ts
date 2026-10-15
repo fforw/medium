@@ -1,6 +1,7 @@
 import GhostAdminAPI from "@tryghost/admin-api";
 import type { Config } from "./config.ts";
-import { resolvePage, type Data, type Page } from "./data.ts";
+import { loadData, resolvePage, withDataLock, type Data, type Page } from "./data.ts";
+import { backupData } from "./remote.ts";
 import { renderPage } from "./render.ts";
 
 /** One lexical HTML card keeps Ghost from reformatting the markup */
@@ -56,4 +57,17 @@ export async function pushPages(config: Config, data: Data, pages: Page[])
 export function pagesFor(data: Data, slugs: string[]): Page[]
 {
     return [...new Set(slugs.map(s => resolvePage(data, s)))];
+}
+
+/**
+ * Pushes the pages picked from the data file as it is now, then backs the file up. It holds the lock,
+ * so a run that started earlier can't push its older view of a page over a newer one.
+ */
+export function publish(config: Config, pick: (data: Data) => Page[])
+{
+    return withDataLock(config.dataFile, async () => {
+        const data = loadData(config.dataFile);
+        await pushPages(config, data, pick(data));
+        await backupData(config);
+    });
 }
