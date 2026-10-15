@@ -2,9 +2,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import type { Config } from "../config.ts";
-import { deploymentOwner, loadData, saveData, today } from "../data.ts";
-import { pagesFor, pushPages } from "../ghost.ts";
-import { backupData, syncFile } from "../remote.ts";
+import { deploymentOwner, findItem, loadData, today, updateData } from "../data.ts";
+import { pagesFor, publish } from "../ghost.ts";
+import { syncFile } from "../remote.ts";
 import { demoUrl } from "../render.ts";
 import { readManifest, readOrigin } from "../repo.ts";
 import { takeShot } from "../shot.ts";
@@ -43,9 +43,16 @@ export async function shot(config: Config, slug: string, pick: boolean)
         fs.rmSync(tmp, { recursive: true, force: true });
     }
 
-    // A new updated date also changes the thumbnail URL, so caches pick up the new shot
-    item.updated = today();
-    saveData(config.dataFile, data);
-    await pushPages(config, data, pagesFor(data, [item.category]));
-    await backupData(config);
+    // A new updated date also changes the thumbnail URL, so caches pick up the new shot.
+    // Set in the data file as it is now, since picking a frame by hand can take a while.
+    const category = await updateData(config.dataFile, data => {
+        const current = findItem(data, slug);
+        if (!current)
+        {
+            throw new Error(`"${slug}" was removed from the data file meanwhile`);
+        }
+        current.updated = today();
+        return current.category;
+    });
+    await publish(config, data => pagesFor(data, [category]));
 }
