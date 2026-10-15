@@ -72,6 +72,19 @@ the server (the config's `dataBackup`, by default `~/medium/data.json`,
 outside the public static tree) so the nightly server backup holds an
 offsite copy.
 
+Several medium runs can be busy at once: the Finder app opens a
+Terminal window per use, and a run can sit at its prompts, or at a
+screenshot picked by hand, for minutes. So no run saves the data it
+loaded at its start. `add`, `deploy` and `shot` apply their one
+change to the data file as it is at the time of saving
+(`updateData`), and every push renders its pages from the file as it
+is at the time of pushing (`publish`). Both hold a lock while they do:
+`<data file>.lock`, created exclusively and holding the owner's pid.
+A run that finds the lock waits for it; a lock whose process is gone,
+left by a crash or Ctrl-C, is removed. Otherwise two overlapping
+`medium add` runs would each save their own view, and the later one
+would drop the item the earlier one added.
+
 ```json
 {
     "pages": [
