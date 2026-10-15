@@ -167,13 +167,29 @@ ${md(item.description)}${meta.length ? `\n<p class="ff-meta">${meta.join(" · ")
 </article>`;
 }
 
+function newestFirst(a: Item, b: Item): number
+{
+    return b.created.localeCompare(a.created) || a.title.localeCompare(b.title);
+}
+
 /** Visible cards of one category, newest first */
 function cards(config: Config, data: Data, category: string): string[]
 {
     return data.items
         .filter(i => i.category === category && !i.hidden)
-        .sort((a, b) => b.created.localeCompare(a.created) || a.title.localeCompare(b.title))
+        .sort(newestFirst)
         .map(i => card(config, i));
+}
+
+/**
+ * The picture for link previews of a page: the thumbnail of its newest visible item.
+ * Without one Ghost falls back to the site's cover image, which isn't on the page.
+ */
+export function pageImage(config: Config, data: Data, page: Page): string | null
+{
+    const categories = new Set(data.categories.filter(c => c.page === page.slug).map(c => c.slug));
+    const newest = data.items.filter(i => categories.has(i.category) && !i.hidden).sort(newestFirst)[0];
+    return newest ? thumbUrl(config, newest) : null;
 }
 
 function grid(cards: string[]): string

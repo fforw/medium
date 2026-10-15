@@ -2,7 +2,7 @@ import GhostAdminAPI from "@tryghost/admin-api";
 import type { Config } from "./config.ts";
 import { loadData, resolvePage, withDataLock, type Data, type Page } from "./data.ts";
 import { backupData } from "./remote.ts";
-import { renderPage } from "./render.ts";
+import { pageImage, renderPage } from "./render.ts";
 
 /** One lexical HTML card keeps Ghost from reformatting the markup */
 function lexical(html: string): string
@@ -26,7 +26,13 @@ export async function pushPages(config: Config, data: Data, pages: Page[])
     const api = new GhostAdminAPI({ url: config.ghost.url, key: config.ghost.adminKey, version: "v5.0" });
     for (const page of pages)
     {
-        const fields = { title: page.title, lexical: lexical(renderPage(config, data, page)) };
+        const image = pageImage(config, data, page);
+        const fields = {
+            title: page.title,
+            lexical: lexical(renderPage(config, data, page)),
+            og_image: image,
+            twitter_image: image,
+        };
         let existing;
         try
         {

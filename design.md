@@ -373,6 +373,10 @@ the data file by hand, followed by a `medium push`.
 * Thumbnail URLs carry `?v=<updated>`, so a new screenshot or painting
   isn't hidden by a cached old one. `medium shot` sets `updated` for
   that reason.
+* A page's `og_image` and `twitter_image` are the thumbnail of its
+  newest visible item, so link previews (Bluesky, Mastodon, ...) show
+  something from the page. Without them Ghost falls back to the site's
+  cover image.
 * When a page is updated, medium sends the page's current `updated_at`
   back, as Ghost requires. It only ever touches the pages listed in
   `pages`. A page that doesn't exist in Ghost yet is created as a
