@@ -2,9 +2,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import type { Config } from "../config.ts";
-import { deploymentOwner, findCategory, findItem, loadData, saveData, today, type Data, type Item } from "../data.ts";
-import { pagesFor, pushPages } from "../ghost.ts";
-import { backupData, ensureDirs, syncDir, syncFile } from "../remote.ts";
+import { deploymentOwner, findCategory, findItem, loadData, today, updateData, type Data, type Item } from "../data.ts";
+import { pagesFor, publish } from "../ghost.ts";
+import { ensureDirs, syncDir, syncFile } from "../remote.ts";
 import { demoUrl } from "../render.ts";
 import { readRepo, type Manifest } from "../repo.ts";
 import { takeShot } from "../shot.ts";
@@ -82,8 +82,12 @@ export async function deploy(config: Config, opts: DeployOptions)
     const data = loadData(config.dataFile);
     const info = readRepo(dir, config.starter);
     info.warnings.forEach(w => console.warn(`warning: ${w}`));
-    let item = checkName(data, slug, variant);
-    const category = item ? item.category : newItemCategory(data, info.manifest);
+    // Checked before uploading anything, and again on saving
+    const known = checkName(data, slug, variant);
+    if (!known)
+    {
+        newItemCategory(data, info.manifest);
+    }
 
     await ensureDirs(config);
     await syncDir(config, docs, `${config.static.folders.demos}/${variant ?? slug}`);
@@ -103,23 +107,26 @@ export async function deploy(config: Config, opts: DeployOptions)
         }
     }
 
-    const fields = { title: info.title ?? slug, description: info.description, repo: info.repo, updated: today() };
-    if (item)
-    {
-        warnDisagreements(item, info.manifest);
-        Object.assign(item, fields);
-    }
-    else
-    {
-        item = { slug, category, topics: info.manifest.topics ?? [], variants: [], created: today(), ...fields };
-        data.items.push(item);
-    }
-    if (variant && !item.variants.some(v => v.slug === variant))
-    {
-        item.variants.push({ slug: variant });
-    }
-    saveData(config.dataFile, data);
+    // A screenshot picked by hand can take a while, so this goes into the data file as it is now
+    const category = await updateData(config.dataFile, data => {
+        let item = checkName(data, slug, variant);
+        const fields = { title: info.title ?? slug, description: info.description, repo: info.repo, updated: today() };
+        if (item)
+        {
+            warnDisagreements(item, info.manifest);
+            Object.assign(item, fields);
+        }
+        else
+        {
+            item = { slug, category: newItemCategory(data, info.manifest), topics: info.manifest.topics ?? [], variants: [], created: today(), ...fields };
+            data.items.push(item);
+        }
+        if (variant && !item.variants.some(v => v.slug === variant))
+        {
+            item.variants.push({ slug: variant });
+        }
+        return item.category;
+    });
 
-    await pushPages(config, data, pagesFor(data, [category]));
-    await backupData(config);
+    await publish(config, data => pagesFor(data, [category]));
 }
