@@ -47,8 +47,8 @@ async function askDetails(image: string, slug: string, existing: Item | undefine
     // a painting defaults to its file's mtime, which, unlike the creation time, can be corrected with touch
     const fallback = video ? today() : today(fs.statSync(image).mtime);
     const created = await askUntil("Date", existing?.created ?? fallback, parseDate, "as YYYY-MM-DD");
-    const topics = await ask("Topics, comma-separated", existing?.topics.join(", "));
     const description = await ask("Description (one line of Markdown)", existing?.description);
+    const topics = await ask("Topics, comma-separated", existing?.topics.join(", "));
     const frame = video ? await askUntil("Frame (second of the video for the thumbnail)", String(existing?.frame ?? 1), parseFrame, "a number of seconds, like 1 or 2.5") : undefined;
     const focus = await askUntil("Focus x, y (0..1, empty for automatic)", existing?.focus?.join(", ") ?? "", parseFocus, "two numbers between 0 and 1, like 0.3, 0.6");
     return {

@@ -266,8 +266,8 @@ removed from its title:
 |---|---|
 | Title | the slug with dashes and dots as spaces, in title case (`some-painting` becomes "Some Painting") |
 | Date | today |
-| Topics | none |
 | Description | none; one line of Markdown |
+| Topics | none |
 | Focus | none, i.e. `sharp`'s guess (see below) |
 
 When the painting is already in the data file, the stored values are
