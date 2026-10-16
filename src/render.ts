@@ -9,6 +9,7 @@ import { isVideo, mediaFolder, type Data, type Item, type Page, type Variant } f
 const CSS = `
 .ff-gallery{--gap:1.6rem}
 .ff-gallery>.ff-intro{margin:0 0 2rem}
+.ff-gallery>.ff-outro{margin:2rem 0 0}
 .ff-gallery nav{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;margin:0 0 2rem;font-size:1.6rem}
 .ff-gallery section{margin:0 0 4rem}
 .ff-gallery h2{margin:0 0 .4rem}
@@ -202,6 +203,11 @@ function intro(markdown: string | undefined): string
     return markdown ? `<div class="ff-intro">${md(markdown)}</div>\n` : "";
 }
 
+function outro(markdown: string | undefined): string
+{
+    return markdown ? `\n<div class="ff-outro">${md(markdown)}</div>` : "";
+}
+
 export function renderPage(config: Config, data: Data, page: Page): string
 {
     const categories = data.categories.filter(c => c.page === page.slug);
@@ -225,6 +231,6 @@ ${intro(c.intro)}${grid(cards)}
     const videos = data.items.some(i => isVideo(i) && !i.hidden && categories.some(c => c.slug === i.category));
     return `<div class="ff-gallery kg-width-wide">
 <style>${CSS}${videos ? "\n" + VIDEO_CSS : ""}</style>
-${intro(page.intro)}${body}${videos ? "\n" + VIEWER : ""}
+${intro(page.intro)}${body}${outro(page.outro)}${videos ? "\n" + VIEWER : ""}
 </div>`;
 }

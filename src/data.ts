@@ -6,6 +6,8 @@ export interface Page
     slug: string;
     title: string;
     intro?: string;
+    /** Markdown shown below the cards */
+    outro?: string;
 }
 
 export interface Category

@@ -89,7 +89,7 @@ your pages and categories:
 {
     "pages": [
         { "slug": "demos", "title": "Demos", "intro": "Markdown above everything" },
-        { "slug": "paintings", "title": "Paintings" }
+        { "slug": "paintings", "title": "Paintings", "outro": "Markdown below everything" }
     ],
     "categories": [
         { "slug": "generative", "title": "Generative", "intro": "Markdown above the cards", "page": "demos" },
@@ -103,7 +103,8 @@ your pages and categories:
 * **`pages`** are Ghost pages, by slug. medium only ever touches the
   pages listed here, and rewrites them completely on every push, so
   edits made in Ghost's editor are lost. A page missing in Ghost is
-  created as a draft, to be published there once.
+  created as a draft, to be published there once. `intro` and
+  `outro` are optional Markdown above and below everything else.
 * **`categories`** are the sections of a page, in this order. Several
   categories can share a page; a page with only one shows its cards
   without a heading. Moving a category to another page is a change of

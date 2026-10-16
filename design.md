@@ -91,7 +91,8 @@ would drop the item the earlier one added.
         {
             "slug": "demos",
             "title": "Demos",
-            "intro": "Markdown shown above the section nav"
+            "intro": "Markdown shown above the section nav",
+            "outro": "Markdown shown below the last section"
         }
     ],
     "categories": [
@@ -128,8 +129,8 @@ would drop the item the earlier one added.
 }
 ```
 
-* `pages[].slug` is the Ghost page slug. The page's title and intro
-  belong to no single section, so they live here.
+* `pages[].slug` is the Ghost page slug. The page's title, intro and
+  outro belong to no single section, so they live here.
 * `categories[].page` names the page a category renders to. Several
   categories can share a page; each becomes a section on it, in array
   order. Giving a category its own page later only changes the data,
@@ -364,6 +365,7 @@ the data file by hand, followed by a `medium push`.
   `<section id="<category slug>">` with its title as heading and its
   intro. A page with more than one section gets an anchor nav below the
   intro; a page with a single category shows no section heading or nav.
+  The page outro, if any, comes last, below all sections.
 * Each card shows the screenshot, the title linking to the demo, the
   rendered description, the variants as links, and the GitHub
   link. Painting and video cards link to their file instead, and have
