@@ -15,6 +15,21 @@ The sources run directly with Node 24's type stripping, so changes are
 live; `pnpm typecheck` checks the types. `rsync` and `ssh` must be
 installed, `ffmpeg` too for videos.
 
+## Platforms
+
+medium is developed on macOS, and only the Finder app (see
+[Adding from Finder](#adding-from-finder)) is specific to it.
+
+Linux works with the same setup. If Chromium fails to start for lack
+of system libraries, `sudo pnpm exec playwright install-deps chromium`
+installs them on Debian and Ubuntu; elsewhere, install the libraries
+the error names. `--pick` opens a browser window, so it needs a
+graphical session.
+
+On Windows, run medium inside WSL, which makes it the Linux case. It
+calls `rsync`, which Windows lacks, with local paths that the Windows
+ports of rsync (cwRsync, MSYS2, Cygwin) don't understand.
+
 ## Configuration
 
 `~/.config/medium/config.json` holds the per-machine settings.
