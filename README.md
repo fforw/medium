@@ -8,6 +8,7 @@ the Admin API. See [design.md](design.md) for how it works.
 ## Setup
 
     pnpm install
+    pnpm exec playwright install chromium   # the browser for screenshots
     ln -s "$PWD/src/cli.ts" ~/bin/medium    # any folder on the PATH
 
 The sources run directly with Node 24's type stripping, so changes are
